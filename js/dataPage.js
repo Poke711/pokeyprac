@@ -1,6 +1,5 @@
 // js/dataPage.js
 
-// Export this function so main.js can call it
 export function setupDataPage() {
     const tableBody = document.querySelector('#progress-table tbody');
     let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
@@ -10,20 +9,30 @@ export function setupDataPage() {
         if (allProgress.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 5;
+            // UPDATED: Colspan is now 6 to account for the new column
+            cell.colSpan = 6;
             cell.textContent = 'No progress data found. Add some on the Input page!';
             cell.style.textAlign = 'center';
             row.appendChild(cell);
             tableBody.appendChild(row);
         } else {
-            allProgress.sort((a, b) => b.id - a.id);
+            // Sort data so most recent appears at the top of the table
+            allProgress.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             allProgress.forEach(progress => {
                 const row = document.createElement('tr');
+                
+                // Format the ISO date string into a user-friendly local date/time
+                const formattedDate = progress.timestamp 
+                    ? new Date(progress.timestamp).toLocaleString() 
+                    : 'N/A';
+
+                // UPDATED: Added a <td> for the formatted date
                 row.innerHTML = `
                     <td>${progress.stage}</td>
                     <td>${progress.star}</td>
                     <td>${progress.streak || 'N/A'}</td>
                     <td>${progress.xcam || 'N/A'}</td>
+                    <td>${formattedDate}</td>
                     <td>
                         <button class="action-btn edit-btn" data-id="${progress.id}">Edit</button>
                         <button class="action-btn delete-btn" data-id="${progress.id}">Delete</button>

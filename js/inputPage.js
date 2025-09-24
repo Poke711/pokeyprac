@@ -21,7 +21,6 @@ function displayRecentSubmissions() {
     recentThree.forEach(progress => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'recent-item';
-        // UPDATED: Added a div for stats (streak and time)
         itemDiv.innerHTML = `
             <div class="recent-info">
                 <p class="star-name">${progress.star}</p>
@@ -37,7 +36,6 @@ function displayRecentSubmissions() {
     });
 }
 
-// Export this function so main.js can call it
 export function setupInputPage() {
     const stageSelect = document.getElementById('stage-select');
     const starSelect = document.getElementById('star-select');
@@ -74,12 +72,22 @@ export function setupInputPage() {
             star: form.star.value,
             streak: form.streak.value,
             xcam: form.xcam.value,
+            // --- NEW: Add the timestamp in ISO format for easy parsing ---
+            timestamp: new Date().toISOString(),
         };
 
         let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
 
+        // When editing, we should preserve the original timestamp unless you want to update it.
+        // For now, let's assume editing an entry doesn't change its original achievement date.
         if (editId) {
-            allProgress = allProgress.map(p => p.id === parseInt(editId) ? progressData : p);
+            allProgress = allProgress.map(p => {
+                if (p.id === parseInt(editId)) {
+                    progressData.timestamp = p.timestamp; // Keep original timestamp
+                    return progressData;
+                }
+                return p;
+            });
             localStorage.setItem('progress', JSON.stringify(allProgress));
             window.location.href = 'data.html';
         } else {
@@ -107,7 +115,6 @@ export function setupInputPage() {
 
     const recentContainer = document.getElementById('recent-submissions-container');
     recentContainer.addEventListener('click', (e) => {
-        // Use .closest('button') to handle clicks on text inside the button
         const copyButton = e.target.closest('.copy-btn');
         if (copyButton) {
             const id = parseInt(copyButton.dataset.id);

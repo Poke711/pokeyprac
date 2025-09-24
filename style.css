@@ -27,6 +27,8 @@ header {
     align-items: center;
     flex-wrap: wrap; /* Allows items to stack on small screens */
     gap: 1rem;
+    min-height: 5rem;          /* Enforces a minimum height to prevent shifting */
+    box-sizing: border-box;      /* Ensures padding is included in the height calculation */
 }
 
 .header-left {

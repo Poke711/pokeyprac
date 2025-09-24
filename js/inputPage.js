@@ -13,7 +13,7 @@ const linkContainer = document.getElementById('ukikipedia-link-container');
 
 // --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
-    const STAGE_LINK_STARS = ["Stage", "8 Red Coins", "100 Coins"];
+    const STAGE_LINK_STARS = ["Stage", "8 Red Coins", "100 Coins", "MIPS, the Rabbit (1st)", "MIPS, the Rabbit (2nd)"];
     const baseUrl = "https://ukikipedia.net/wiki/RTA_Guide/";
     const useStageLink = STAGE_LINK_STARS.some(substring => star.includes(substring));
     const pageName = useStageLink ? stage : star;

@@ -52,7 +52,6 @@ function updateUkikipediaLink() {
 }
 
 function displayRecentSubmissions() {
-    // This function remains unchanged...
     const container = document.getElementById('recent-submissions-container');
     if (!container) return;
     const allProgress = JSON.parse(localStorage.getItem('progress')) || [];
@@ -103,12 +102,12 @@ export function setupInputPage() {
             option.textContent = star;
             starSelect.appendChild(option);
         });
-        // NEW: Update the link whenever the star list is repopulated
+        // Update the link whenever the star list is repopulated
         updateUkikipediaLink(); 
     };
 
     stageSelect.addEventListener('change', updateStars);
-    // NEW: Add event listener to the star dropdown itself
+    // Add event listener to the star dropdown itself
     starSelect.addEventListener('change', updateUkikipediaLink);
 
     updateStars(); // Initial population

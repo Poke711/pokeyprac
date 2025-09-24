@@ -23,7 +23,6 @@ export function setupDataPage() {
                     ? new Date(progress.timestamp).toLocaleString() 
                     : 'N/A';
 
-                // --- UPDATED: The actions buttons are now inside a div for easier styling ---
                 row.innerHTML = `
                     <td>${progress.stage}</td>
                     <td>${progress.star}</td>

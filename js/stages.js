@@ -17,8 +17,9 @@ export const stages = {
     "Tiny-Huge Island": ["Pluck the Piranha Flower", "The Tip Top of the Huge Island", "Rematch with Koopa the Quick", "Five Itty Bitty Secrets", "Wiggler's Red Coins", "Make Wiggler Squirm"],
     "Tick Tock Clock": ["Roll into the Cage", "The Pit and the Pendulums", "Get a Hand", "Stomp on the Thwomp", "Timed Jumps on Moving Bars", "Stop Time for Red Coins"],
     "Rainbow Ride": ["Cruiser Crossing the Rainbow", "The Big House in the Sky", "Coins Amassed in a Maze", "Swingin' in the Breeze", "Tricky Triangles!", "Somewhere Over the Rainbow"],
-    // --- New Bowser Stages Added Here ---
+    // Bowser Stages
     "Bowser in the Dark World": ["8 Red Coins", "Stage"],
     "Bowser in the Fire Sea": ["8 Red Coins", "Stage"],
     "Bowser in the Sky": ["8 Red Coins", "Stage"]
+    //TODO Secret Stages
 };

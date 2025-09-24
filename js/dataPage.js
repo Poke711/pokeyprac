@@ -9,33 +9,32 @@ export function setupDataPage() {
         if (allProgress.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            // UPDATED: Colspan is now 6 to account for the new column
             cell.colSpan = 6;
             cell.textContent = 'No progress data found. Add some on the Input page!';
             cell.style.textAlign = 'center';
             row.appendChild(cell);
             tableBody.appendChild(row);
         } else {
-            // Sort data so most recent appears at the top of the table
             allProgress.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             allProgress.forEach(progress => {
                 const row = document.createElement('tr');
                 
-                // Format the ISO date string into a user-friendly local date/time
                 const formattedDate = progress.timestamp 
                     ? new Date(progress.timestamp).toLocaleString() 
                     : 'N/A';
 
-                // UPDATED: Added a <td> for the formatted date
+                // --- UPDATED: The actions buttons are now inside a div for easier styling ---
                 row.innerHTML = `
                     <td>${progress.stage}</td>
                     <td>${progress.star}</td>
                     <td>${progress.streak || 'N/A'}</td>
                     <td>${progress.xcam || 'N/A'}</td>
                     <td>${formattedDate}</td>
-                    <td>
-                        <button class="action-btn edit-btn" data-id="${progress.id}">Edit</button>
-                        <button class="action-btn delete-btn" data-id="${progress.id}">Delete</button>
+                    <td class="actions-cell">
+                        <div class="action-buttons-container">
+                            <button class="action-btn edit-btn" data-id="${progress.id}">Edit</button>
+                            <button class="action-btn delete-btn" data-id="${progress.id}">Delete</button>
+                        </div>
                     </td>
                 `;
                 tableBody.appendChild(row);

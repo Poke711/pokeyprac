@@ -22,20 +22,21 @@
             <label for="star-select">Star:</label>
             <select id="star-select" name="star"></select>
 
-            <label for="streak-input">Streak Length:</label>
+            <!-- NEW: Container for the Ukikipedia link -->
+            <div id="ukikipedia-link-container"></div>
+
+            <label for="streak-input">Streaks:</label>
             <input type="number" id="streak-input" name="streak">
 
             <label for="xcam-input">X-Cam Time:</label>
             <input type="text" id="xcam-input" name="xcam">
 
-            <button type="submit">Add Streak</button>
+            <button type="submit">Add Progress</button>
         </form>
 
-        <!-- New Section for Recent Submissions -->
         <section id="recent-submissions">
             <h2>Recent Submissions</h2>
             <div id="recent-submissions-container">
-                <!-- Recent submissions will be dynamically added here by app.js -->
             </div>
         </section>
     </main>

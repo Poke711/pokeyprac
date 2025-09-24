@@ -38,7 +38,7 @@ nav a:hover {
 
 main {
     padding: 1rem;
-    max-width: 800px; /* Increased max-width for the table page */
+    max-width: 800px;
     margin: auto;
 }
 
@@ -51,8 +51,8 @@ form {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    max-width: 500px; /* Keep form narrower */
-    margin: auto; /* Center the form */
+    max-width: 500px;
+    margin: auto;
 }
 
 label {
@@ -95,24 +95,57 @@ button:hover {
     background-color: #444;
 }
 
-/* --- NEW and IMPROVED Table Styles --- */
+
+/* --- NEW: Ukikipedia Link Button --- */
+#ukikipedia-link-container {
+    margin-bottom: 0.25rem; /* Add some space below it */
+    height: 38px; /* Give a fixed height to prevent layout shifting when it appears */
+}
+
+.ukikipedia-button {
+    display: flex; /* Use flex to align text and icon */
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Space between text and icon */
+    width: 100%;
+    padding: 0.6rem;
+    box-sizing: border-box; /* Ensure padding is included in height */
+    border-radius: 5px;
+    background-color: #5865f2; /* A nice purple/blue */
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.ukikipedia-button:hover {
+    background-color: #4752c4;
+}
+
+.ukikipedia-button svg {
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+
+/* --- Table Styles --- */
 table {
     width: 100%;
-    border-collapse: separate; /* Required for border-radius on tables */
+    border-collapse: separate;
     border-spacing: 0;
     margin-top: 1rem;
     border: 1px solid var(--border-color);
-    border-radius: 8px; /* Rounded corners for the whole table */
-    overflow: hidden; /* Clips the corners of the cells */
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 th, td {
-    padding: 0.8rem 1rem; /* More padding */
+    padding: 0.8rem 1rem;
     text-align: left;
-    border-bottom: 1px solid var(--border-color); /* Horizontal lines */
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Remove bottom border from the last row */
 tr:last-child td {
     border-bottom: none;
 }
@@ -128,19 +161,17 @@ td {
     color: var(--secondary-text-color);
 }
 
-/* Style the text in the main data cells */
 td:not(.actions-cell) {
     color: var(--primary-text-color);
 }
 
-/* --- NEW Action Button Styles --- */
 .action-buttons-container {
     display: flex;
-    gap: 0.5rem; /* Space between buttons */
+    gap: 0.5rem;
 }
 
 .action-btn {
-    flex: 1; /* Make buttons share space equally */
+    flex: 1;
     cursor: pointer;
     padding: 0.5rem;
     border: none;
@@ -150,20 +181,19 @@ td:not(.actions-cell) {
 }
 
 .action-btn:hover {
-    filter: brightness(0.9); /* Darken button slightly on hover */
+    filter: brightness(0.9);
 }
 
 .edit-btn { 
     background-color: var(--edit-btn-bg);
-    color: #1e1e1e; /* Dark text for light button */
+    color: #1e1e1e;
 }
 .delete-btn { 
     background-color: var(--delete-btn-bg);
     color: white;
 }
 
-
-/* --- Popup and Recent Submission styles are unchanged but included for completeness --- */
+/* --- Popup and Recent Submission Styles --- */
 .popup {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
     background-color: #28a745; color: white; padding: 1rem 2rem; border-radius: 5px;

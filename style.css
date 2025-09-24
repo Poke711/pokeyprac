@@ -20,14 +20,14 @@ nav a {
 
 main {
     padding: 1rem;
+    max-width: 500px;
+    margin: auto;
 }
 
 form {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-width: 500px;
-    margin: auto;
     background: white;
     padding: 1rem;
     border-radius: 5px;
@@ -82,7 +82,6 @@ th {
     background-color: #dc3545;
 }
 
-/* New styles for the popup */
 .popup {
     position: fixed;
     top: 20px;
@@ -100,4 +99,68 @@ th {
 
 .popup.show {
     opacity: 1;
+}
+
+/* Styles for recent submissions */
+#recent-submissions {
+    background: white;
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+#recent-submissions h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.recent-info p {
+    margin: 0;
+}
+
+.recent-info p.star-name {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+/* NEW: Styles for stage name and stats */
+.recent-info p.stage-name {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.recent-stats {
+    display: flex;
+    gap: 1.5rem; /* Puts space between Streak and Time */
+    font-size: 0.9rem;
+    color: #343a40;
+}
+
+.recent-stats p > strong {
+    font-weight: 600; /* Makes the number/time slightly bolder */
+}
+
+
+.copy-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    align-self: center; /* Aligns button to the vertical center */
 }

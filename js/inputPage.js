@@ -1,35 +1,27 @@
 // js/inputPage.js
 
-import { stages } from './stages.js';
+import { stages as masterStages } from './stages.js';
+import { categories } from './categoryData.js';
 import { showSuccessPopup } from './utils.js';
 
-// A list of star names/substrings that should link to the stage page instead of a dedicated star page.
-const STAGE_LINK_STARS = [
-    "Stage", "8 Red Coins"
-]
+// --- DOM Element References ---
+const categorySelect = document.getElementById('category-select');
+const stageSelect = document.getElementById('stage-select');
+const starSelect = document.getElementById('star-select');
+const form = document.getElementById('progress-form');
+const linkContainer = document.getElementById('ukikipedia-link-container');
 
-/**
- * Generates the appropriate Ukikipedia URL for a given stage and star.
- * @param {string} stage The name of the stage.
- * @param {string} star The name of the star.
- * @returns {string} The formatted URL.
- */
+// --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
+    const STAGE_LINK_STARS = ["Stage", "8 Red Coins", "100 Coins"];
     const baseUrl = "https://ukikipedia.net/wiki/RTA_Guide/";
     const useStageLink = STAGE_LINK_STARS.some(substring => star.includes(substring));
     const pageName = useStageLink ? stage : star;
-    const formattedName = pageName.replace(/ /g, '_'); // Replace spaces with underscores
+    const formattedName = pageName.replace(/ /g, '_');
     return baseUrl + formattedName;
 }
 
-/**
- * Updates the link button on the page based on the current selection.
- */
 function updateUkikipediaLink() {
-    const stageSelect = document.getElementById('stage-select');
-    const starSelect = document.getElementById('star-select');
-    const linkContainer = document.getElementById('ukikipedia-link-container');
-
     const selectedStage = stageSelect.value;
     const selectedStar = starSelect.value;
 
@@ -39,18 +31,76 @@ function updateUkikipediaLink() {
     }
     
     const url = generateUkikipediaUrl(selectedStage, selectedStar);
-
     linkContainer.innerHTML = `
         <a href="${url}" target="_blank" rel="noopener noreferrer" class="ukikipedia-button">
             View on Ukikipedia
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
         </a>
     `;
 }
 
+// --- Dropdown Population Logic ---
+function populateStars() {
+    const selectedCategory = categorySelect.value;
+    const selectedStage = stageSelect.value;
+    const categoryData = categories[selectedCategory];
+
+    starSelect.innerHTML = '';
+
+    if (!selectedStage || !categoryData) {
+        updateUkikipediaLink();
+        return;
+    }
+
+    const starsForStage = (categoryData === "ALL") 
+        ? masterStages[selectedStage] 
+        : categoryData[selectedStage] || [];
+
+    starsForStage.forEach(star => {
+        const option = document.createElement('option');
+        option.value = star;
+        option.textContent = star;
+        starSelect.appendChild(option);
+    });
+
+    updateUkikipediaLink();
+}
+
+function populateStages() {
+    const selectedCategory = categorySelect.value;
+    const categoryData = categories[selectedCategory];
+    
+    stageSelect.innerHTML = '';
+
+    if (!categoryData) {
+        populateStars(); // This will clear the star list
+        return;
+    }
+
+    const stagesForCategory = (categoryData === "ALL")
+        ? Object.keys(masterStages)
+        : Object.keys(categoryData);
+
+    stagesForCategory.forEach(stageName => {
+        const option = document.createElement('option');
+        option.value = stageName;
+        option.textContent = stageName;
+        stageSelect.appendChild(option);
+    });
+    
+    populateStars();
+}
+
+function populateCategories() {
+    Object.keys(categories).forEach(categoryName => {
+        const option = document.createElement('option');
+        option.value = categoryName;
+        option.textContent = categoryName;
+        categorySelect.appendChild(option);
+    });
+}
+
+// --- Recent Submissions Logic ---
 function displayRecentSubmissions() {
     const container = document.getElementById('recent-submissions-container');
     if (!container) return;
@@ -79,84 +129,46 @@ function displayRecentSubmissions() {
     });
 }
 
+// --- Main Setup Function ---
 export function setupInputPage() {
-    const stageSelect = document.getElementById('stage-select');
-    const starSelect = document.getElementById('star-select');
-    const form = document.getElementById('progress-form');
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get('edit');
-
-    for (const stage in stages) {
-        const option = document.createElement('option');
-        option.value = stage;
-        option.textContent = stage;
-        stageSelect.appendChild(option);
-    }
-
-    const updateStars = () => {
-        const selectedStage = stageSelect.value;
-        starSelect.innerHTML = '';
-        stages[selectedStage].forEach(star => {
-            const option = document.createElement('option');
-            option.value = star;
-            option.textContent = star;
-            starSelect.appendChild(option);
-        });
-        // Update the link whenever the star list is repopulated
-        updateUkikipediaLink(); 
-    };
-
-    stageSelect.addEventListener('change', updateStars);
-    // Add event listener to the star dropdown itself
+    // Attach event listeners
+    categorySelect.addEventListener('change', populateStages);
+    stageSelect.addEventListener('change', populateStars);
     starSelect.addEventListener('change', updateUkikipediaLink);
 
-    updateStars(); // Initial population
+    // Initial population
+    populateCategories();
+    categorySelect.value = "120 Star"; // Default to 120 Star
+    populateStages();
 
-    // The rest of the function (form submission, edit logic, etc.) remains unchanged...
+    // Form submission logic
     form.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // Prevent submission if no star is selected (e.g., in 0 Star)
+        if (!starSelect.value) {
+            alert("Cannot add progress: no star selected.");
+            return;
+        }
+
         const progressData = {
-            id: editId ? parseInt(editId) : Date.now(),
-            stage: form.stage.value,
-            star: form.star.value,
+            id: Date.now(),
+            stage: stageSelect.value,
+            star: starSelect.value,
             streak: form.streak.value,
             xcam: form.xcam.value,
             timestamp: new Date().toISOString(),
         };
         let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-        if (editId) {
-            allProgress = allProgress.map(p => {
-                if (p.id === parseInt(editId)) {
-                    progressData.timestamp = p.timestamp;
-                    return progressData;
-                }
-                return p;
-            });
-            localStorage.setItem('progress', JSON.stringify(allProgress));
-            window.location.href = 'data.html';
-        } else {
-            allProgress.push(progressData);
-            localStorage.setItem('progress', JSON.stringify(allProgress));
-            showSuccessPopup('Progress saved successfully!');
-            form.streak.value = '';
-            form.xcam.value = '';
-            displayRecentSubmissions();
-        }
+        allProgress.push(progressData);
+        localStorage.setItem('progress', JSON.stringify(allProgress));
+        showSuccessPopup('Progress saved successfully!');
+        form.streak.value = '';
+        form.xcam.value = '';
+        displayRecentSubmissions();
     });
 
-    if (editId) {
-        let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-        const progressToEdit = allProgress.find(p => p.id === parseInt(editId));
-        if (progressToEdit) {
-            form.stage.value = progressToEdit.stage;
-            updateStars();
-            form.star.value = progressToEdit.star;
-            form.streak.value = progressToEdit.streak;
-            form.xcam.value = progressToEdit.xcam;
-            form.querySelector('button').textContent = 'Update Progress';
-        }
-    }
-
+    // Recent submissions "Copy" logic
     const recentContainer = document.getElementById('recent-submissions-container');
     recentContainer.addEventListener('click', (e) => {
         const copyButton = e.target.closest('.copy-btn');
@@ -165,14 +177,26 @@ export function setupInputPage() {
             const allProgress = JSON.parse(localStorage.getItem('progress')) || [];
             const progressToCopy = allProgress.find(p => p.id === id);
             if (progressToCopy) {
-                form.stage.value = progressToCopy.stage;
-                stageSelect.dispatchEvent(new Event('change'));
-                form.star.value = progressToCopy.star;
+                // To properly copy, we need to check if the star exists in the current category
+                const categoryData = categories[categorySelect.value];
+                const stageExists = categoryData === "ALL" || categoryData.hasOwnProperty(progressToCopy.stage);
+                const starExists = stageExists && (categoryData === "ALL" || categoryData[progressToCopy.stage].includes(progressToCopy.star));
+
+                if (!starExists) {
+                    alert(`'${progressToCopy.star}' is not in the currently selected '${categorySelect.value}' category. Please switch categories to copy this entry.`);
+                    return;
+                }
+
+                stageSelect.value = progressToCopy.stage;
+                populateStars(); // Repopulate stars for the copied stage
+                starSelect.value = progressToCopy.star;
                 form.streak.value = progressToCopy.streak;
                 form.xcam.value = progressToCopy.xcam;
+                updateUkikipediaLink();
                 window.scrollTo(0, 0);
             }
         }
     });
+
     displayRecentSubmissions();
 }

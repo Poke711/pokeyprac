@@ -74,6 +74,11 @@ main {
     margin: 2rem auto; /* Give it some space from the header */
 }
 
+main.graphs-main {
+    max-width: 1200px; /* Allow the container to be much wider */
+}
+
+
 form {
     display: flex;
     flex-direction: column;
@@ -205,4 +210,58 @@ td:not(.actions-cell) { color: var(--primary-text-color); }
 .copy-btn {
     background-color: var(--accent-color); color: white; border: none; padding: 0.4rem 0.8rem;
     border-radius: 3px; cursor: pointer; align-self: center; margin-left: 1rem; flex-shrink: 0;
+}
+
+/* --- UPDATED: Graph Page Styles --- */
+.graph-page-container {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.graph-page-container h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+#graph-controls {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 250px;
+}
+
+#graphs-container {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.chart-container {
+    position: relative;
+    height: 50vh; /* Increased height slightly */
+    /* UPDATED: Use flexbox to automatically share space */
+    flex: 1; 
+    min-width: 300px; /* Prevents charts from getting too squished */
+}
+
+/* Responsive adjustments for graphs */
+@media (max-width: 920px) {
+    #graphs-container {
+        flex-direction: column; /* Stack charts vertically on smaller screens */
+        align-items: center;
+    }
+    .chart-container {
+        width: 100%; /* Charts take up full width when stacked */
+        height: 300px; /* Fixed height for mobile */
+    }
 }

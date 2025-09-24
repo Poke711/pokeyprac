@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokeyprac - Graphs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>Pokeyprac</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="data.html">My Submissions</a>
+                <a href="graphs.html">Graphs</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- UPDATED: Added a class to the main element -->
+    <main class="graphs-main">
+        <div class="graph-page-container">
+            <h2>Progress Over Time</h2>
+            <div id="graph-controls">
+                <div class="control-group">
+                    <label for="graph-stage-select">Select a Stage:</label>
+                    <select id="graph-stage-select"></select>
+                </div>
+                <div class="control-group">
+                    <label for="graph-star-select">Select a Star:</label>
+                    <select id="graph-star-select"></select>
+                </div>
+            </div>
+
+            <div id="graphs-container">
+                <div class="chart-container">
+                    <canvas id="streak-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="xcam-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CDN link for the Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>

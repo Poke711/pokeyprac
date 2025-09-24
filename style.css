@@ -42,6 +42,12 @@ header h1 {
     font-size: 1.5rem;
 }
 
+
+.header-icon {
+    height: 4rem; /* Adjust this value to get the size you want */
+    width: 4rem;   /* This maintains the original aspect ratio */
+}
+
 nav a {
     color: white;
     margin: 0 0.5rem;
@@ -66,18 +72,21 @@ nav a:hover {
     color: var(--secondary-text-color);
 }
 
-
-/* --- Main Content and Form Styles --- */
 main {
     padding: 1rem;
     max-width: 500px;
     margin: 2rem auto; /* Give it some space from the header */
 }
 
+/* --- NEW: Style for the wider data table page --- */
+main.data-main {
+    max-width: 1000px; /* Wider container for the table */
+}
+
+/* --- Style for the wider graphs page main container --- */
 main.graphs-main {
     max-width: 1200px; /* Allow the container to be much wider */
 }
-
 
 form {
     display: flex;

@@ -1,12 +1,23 @@
+/* --- Base and Dark Theme Colors --- */
+:root {
+    --bg-color: #1e1e1e;
+    --surface-color: #2d2d2d;
+    --primary-text-color: #e0e0e0;
+    --secondary-text-color: #a0a0a0;
+    --border-color: #444;
+    --accent-color: #007bff;
+    --header-bg: #121212;
+}
+
 body {
     font-family: sans-serif;
     margin: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
 }
 
 header {
-    background-color: #333;
+    background-color: var(--header-bg);
     color: white;
     padding: 1rem;
     text-align: center;
@@ -16,6 +27,11 @@ nav a {
     color: white;
     margin: 0 1rem;
     text-decoration: none;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--accent-color);
 }
 
 main {
@@ -24,46 +40,74 @@ main {
     margin: auto;
 }
 
+/* --- Form Styles --- */
 form {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    background: white;
-    padding: 1rem;
-    border-radius: 5px;
+    gap: 0.75rem; /* Increased gap slightly */
+    background: var(--surface-color);
+    padding: 1.5rem; /* Increased padding */
+    border-radius: 8px; /* Softer corners */
+    border: 1px solid var(--border-color);
 }
 
 label {
     font-weight: bold;
+    color: var(--secondary-text-color);
 }
 
-input, select, button {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+input, select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    font-size: 1rem;
+}
+
+select {
+    /* Style for the dropdown arrow */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0a0a0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right .7em top 50%;
+    background-size: .65em auto;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 button {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
     background-color: #333;
-    color: white;
+    color: var(--primary-text-color);
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
 }
 
+button:hover {
+    background-color: #444;
+}
+
+/* --- Table Styles (for data.html) --- */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    background: white;
+    background: var(--surface-color);
 }
 
 th, td {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
     text-align: left;
 }
 
 th {
-    background-color: #f4f4f4;
+    background-color: #333;
 }
 
 .action-btn {
@@ -74,14 +118,10 @@ th {
     color: white;
 }
 
-.edit-btn {
-    background-color: #ffc107;
-}
+.edit-btn { background-color: #ffc107; }
+.delete-btn { background-color: #dc3545; }
 
-.delete-btn {
-    background-color: #dc3545;
-}
-
+/* --- Popup Styles --- */
 .popup {
     position: fixed;
     top: 20px;
@@ -97,38 +137,45 @@ th {
     transition: opacity 0.5s;
 }
 
-.popup.show {
-    opacity: 1;
-}
+.popup.show { opacity: 1; }
 
-/* Styles for recent submissions */
+/* --- Recent Submissions Styles (with the fix) --- */
 #recent-submissions {
-    background: white;
+    background: var(--surface-color);
     margin-top: 2rem;
-    padding: 1rem;
-    border-radius: 5px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
 }
 
 #recent-submissions h2 {
     margin-top: 0;
     text-align: center;
+    color: var(--primary-text-color);
 }
 
 .recent-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    border-bottom: 1px solid #eee;
+    align-items: flex-start; /* Changed for better alignment with multi-line text */
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .recent-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+}
+.recent-item:first-child {
+    padding-top: 0;
 }
 
-.recent-info p {
-    margin: 0;
+.recent-info {
+    /* THE FIX: This tells the info section to take all available space */
+    flex-grow: 1;
 }
+
+.recent-info p { margin: 0; }
 
 .recent-info p.star-name {
     font-weight: bold;
@@ -136,31 +183,30 @@ th {
     margin-bottom: 2px;
 }
 
-/* NEW: Styles for stage name and stats */
 .recent-info p.stage-name {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--secondary-text-color);
     margin-bottom: 8px;
 }
 
 .recent-stats {
     display: flex;
-    gap: 1.5rem; /* Puts space between Streak and Time */
+    gap: 1.5rem;
     font-size: 0.9rem;
-    color: #343a40;
+    color: var(--primary-text-color);
 }
 
-.recent-stats p > strong {
-    font-weight: 600; /* Makes the number/time slightly bolder */
-}
-
+.recent-stats p > strong { font-weight: 600; }
 
 .copy-btn {
-    background-color: #007bff;
+    background-color: var(--accent-color);
     color: white;
     border: none;
     padding: 0.4rem 0.8rem;
     border-radius: 3px;
     cursor: pointer;
-    align-self: center; /* Aligns button to the vertical center */
+    align-self: center;
+    margin-left: 1rem; /* Add some space between text and button */
+    /* THE FIX: Prevents the button from shrinking */
+    flex-shrink: 0;
 }

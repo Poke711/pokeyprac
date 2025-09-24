@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokeyprac - Track Progress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Pokeyprac</h1>
+        <nav>
+            <a href="index.html">Input</a>
+            <a href="data.html">Data</a>
+        </nav>
+    </header>
+    <main>
+        <form id="progress-form">
+            <label for="stage-select">Stage:</label>
+            <select id="stage-select" name="stage"></select>
+
+            <label for="star-select">Star:</label>
+            <select id="star-select" name="star"></select>
+
+            <label for="streak-input">Streaks:</label>
+            <input type="number" id="streak-input" name="streak">
+
+            <label for="xcam-input">X-Cam Time:</label>
+            <input type="text" id="xcam-input" name="xcam">
+
+            <button type="submit">Add Progress</button>
+        </form>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

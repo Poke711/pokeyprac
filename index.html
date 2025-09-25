@@ -35,8 +35,16 @@
             <label for="star-select">Star:</label>
             <select id="star-select" name="star"></select>
 
-            <label for="streak-input">Streak:</label>
-            <input type="number" id="streak-input" name="streak">
+            <label>Streak:</label>
+            <div id="streak-buttons-container">
+                <button type="button" class="streak-btn" data-value="1">1</button>
+                <button type="button" class="streak-btn" data-value="2">2</button>
+                <button type="button" class="streak-btn" data-value="3">3</button>
+                <button type="button" class="streak-btn" data-value="4">4</button>
+                <input type="number" id="streak-custom-btn" class="streak-btn" value="5" min="1">
+            </div>
+            <!-- Hidden input to store the actual value for submission -->
+            <input type="hidden" id="streak-value-hidden" name="streak">
 
             <label for="xcam-input">X-Cam Time:</label>
             <input type="text" id="xcam-input" name="xcam">

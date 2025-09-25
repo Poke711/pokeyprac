@@ -4,7 +4,7 @@ import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
 import { showSuccessPopup } from './utils.js';
 import { db, triggerLogin } from './auth.js';
-import { collection, addDoc, doc, getDoc, updateDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { collection, addDoc, doc, getDoc, setDoc, updateDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // --- DOM Element References ---
 const categorySelect = document.getElementById('category-select');
@@ -13,6 +13,11 @@ const starSelect = document.getElementById('star-select');
 const form = document.getElementById('progress-form');
 const linkContainer = document.getElementById('ukikipedia-link-container');
 const submitButton = document.getElementById('submit-progress-button');
+// References for the streak button UI ---
+const streakButtonsContainer = document.getElementById('streak-buttons-container');
+const streakBtns = document.querySelectorAll('.streak-btn');
+const hiddenStreakInput = document.getElementById('streak-value-hidden');
+const customStreakBtn = document.getElementById('streak-custom-btn');
 
 // --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
@@ -40,7 +45,7 @@ function updateUkikipediaLink() {
     `;
 }
 
-// --- Dropdown Population Logic (RESTORED) ---
+// --- Dropdown Population Logic ---
 function populateStars() {
     const selectedCategory = categorySelect.value;
     const selectedStage = stageSelect.value;
@@ -93,11 +98,51 @@ export function setupInputPage(user) {
     let recentSubmissionsData = [];
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
+    let saveTimeout;
+
+    // --- NEW HELPER FUNCTION: Updates the streak button UI based on a value ---
+    function updateStreakButtonsUI(value) {
+        if (!value) {
+            streakBtns.forEach(btn => btn.classList.remove('active'));
+            hiddenStreakInput.value = '';
+            return;
+        }
+
+        streakBtns.forEach(btn => btn.classList.remove('active'));
+        const presetBtn = streakButtonsContainer.querySelector(`.streak-btn[data-value="${value}"]`);
+
+        if (presetBtn) {
+            presetBtn.classList.add('active');
+        } else {
+            customStreakBtn.value = value;
+            customStreakBtn.classList.add('active');
+        }
+        hiddenStreakInput.value = value;
+    }
+
+    async function loadCustomStreakValue() {
+        if (user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists() && userSnap.data().customStreakValue) {
+                customStreakBtn.value = userSnap.data().customStreakValue;
+            } else {
+                customStreakBtn.value = 5;
+            }
+        }
+    }
+
+    async function saveCustomStreakValue(value) {
+        if (user) {
+            const userRef = doc(db, "users", user.uid);
+            await setDoc(userRef, { customStreakValue: value }, { merge: true });
+        }
+    }
 
     async function displayRecentSubmissions() {
         const container = document.getElementById('recent-submissions-container');
         if (!container) return;
-        recentSubmissionsData = []; 
+        recentSubmissionsData = [];
         container.innerHTML = '<p style="text-align: center; color: #888;">Log in to see your recent submissions.</p>';
         if (user) {
             const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(3));
@@ -133,45 +178,65 @@ export function setupInputPage(user) {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && docSnap.data().userId === user.uid) {
                 const data = docSnap.data();
-                categorySelect.value = "120 Star"; // Default to all-encompassing category to find the star
+                categorySelect.value = "120 Star";
                 populateStages();
                 stageSelect.value = data.stage;
                 populateStars();
                 starSelect.value = data.star;
-                form.streak.value = data.streak;
+                
+                // --- UPDATED: Use the new helper function to set the streak UI ---
+                updateStreakButtonsUI(data.streak);
+                
                 form.xcam.value = data.xcam;
-                form.querySelector('button').textContent = 'Update Progress';
+                submitButton.textContent = 'Update Progress';
                 updateUkikipediaLink();
             } else {
                 alert("Could not load data for editing. It may have been deleted or you don't have permission.");
-                window.location.href = 'index.html'; // Go back to a clean page
+                window.location.href = 'index.html';
             }
         }
     }
+    
+    streakButtonsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('streak-btn')) {
+            streakBtns.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            hiddenStreakInput.value = e.target.dataset.value || e.target.value;
+        }
+    });
+
+    customStreakBtn.addEventListener('input', () => {
+        hiddenStreakInput.value = customStreakBtn.value;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveCustomStreakValue(customStreakBtn.value);
+        }, 1000);
+    });
 
     categorySelect.addEventListener('change', populateStages);
     stageSelect.addEventListener('change', populateStars);
     starSelect.addEventListener('change', updateUkikipediaLink);
 
     populateCategories();
-    populateStages(); // Initial population
-    loadDataForEditing(); // Load data if in edit mode
+    populateStages();
+    loadCustomStreakValue();
+    loadDataForEditing();
 
     if (!user) {
         Array.from(form.elements).forEach(element => {
-            // Keep the submit button enabled, disable everything else
-            if(element.tagName !== 'BUTTON') {
+            if (element.tagName !== 'BUTTON') {
                 element.disabled = true;
             }
         });
         submitButton.textContent = 'Please Log In to Add Progress';
+    } else {
+        submitButton.textContent = editId ? 'Update Progress' : 'Add Progress';
     }
 
     submitButton.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!user) {
             triggerLogin();
-            // ...trigger the login flow instead of showing an alert.
             return;
         }
         if (!starSelect.value) { alert("No star selected."); return; }
@@ -179,7 +244,7 @@ export function setupInputPage(user) {
         const progressData = {
             stage: stageSelect.value,
             star: starSelect.value,
-            streak: form.streak.value,
+            streak: hiddenStreakInput.value,
             xcam: form.xcam.value,
         };
 
@@ -196,8 +261,11 @@ export function setupInputPage(user) {
                     timestamp: new Date().toISOString()
                 });
                 showSuccessPopup('Progress saved!');
-                form.streak.value = '';
-                form.xcam.value = '';
+
+                // --- UPDATED: Manually clear fields instead of using form.reset() ---
+                form.xcam.value = ''; // Clear x-cam time
+                updateStreakButtonsUI(null); // Clear streak buttons and hidden value
+
                 displayRecentSubmissions();
             }
         } catch (error) {
@@ -224,7 +292,10 @@ export function setupInputPage(user) {
                 stageSelect.value = progressToCopy.stage;
                 populateStars();
                 starSelect.value = progressToCopy.star;
-                form.streak.value = progressToCopy.streak;
+
+                // --- UPDATED: Use the new helper function to set the streak UI ---
+                updateStreakButtonsUI(progressToCopy.streak);
+
                 form.xcam.value = progressToCopy.xcam;
                 updateUkikipediaLink();
                 window.scrollTo(0, 0);

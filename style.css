@@ -280,7 +280,6 @@ td { background-color: var(--surface-color); }
     cursor: pointer;
     line-height: 1;
     transition: background-color 0.2s;
-    /* ADD THIS: Ensures all buttons have fully rounded corners now */
     border-radius: 5px;
 }
 

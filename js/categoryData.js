@@ -25,7 +25,7 @@ export const categories = {
         "Castle Secret Stars": ["The Princess's Secret Slide", "MIPS, the Rabbit (1st)", "Toad's First Star", "Toad's Second Star", "Tower of the Wing Cap (8 Red Coins)"]
     },
     "16 Star": {
-        "Bowser in the Dark World": ["Stage"],
+        "Bowser in the Dark World": ["8 Red Coins"],
         "Whomp's Fortress": ["Shoot into the Wild Blue", "Fall onto the Caged Island", "Blast Away the Wall",],
         "Shifting Sand Land": ["In the Talons of the Big Bird", "Shining Atop the Pyramid", "Inside the Ancient Pyramid"],
         "Lethal Lava Land": ["Boil the Big Bully", "8-Coin Puzzle with 15 Pieces", "Red-Hot Log Rolling", "Hot-Foot-It into the Volcano", "Elevator Tour in the Volcano"],

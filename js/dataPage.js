@@ -8,31 +8,30 @@ export async function setupDataPage(user) {
 
     async function fetchData() {
         if (user) {
-            const q = query(collection(db, "progress"), where("userId", "==", user.uid), orderBy("timestamp", "desc"));
+            // UPDATED: Your collection is named "submissions", not "progress"
+            const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("timestamp", "desc"));
             const querySnapshot = await getDocs(q);
             allProgress = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } else {
-            allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-            allProgress.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
     }
 
     function renderTable() {
         tableBody.innerHTML = '';
+        if (!user) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Please log in to see your submissions.</td></tr>`;
+            return;
+        }
+
         if (allProgress.length === 0) {
-            const row = document.createElement('tr');
-            const cell = document.createElement('td');
-            cell.colSpan = 6;
-            cell.textContent = user ? 'No progress data found. Add some on the Home page!' : 'No local data. Log in to see cloud saves or add data on the Home page.';
-            cell.style.textAlign = 'center';
-            row.appendChild(cell);
-            tableBody.appendChild(row);
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No progress data found. Add some on the Home page!</td></tr>`;
         } else {
             allProgress.forEach(progress => {
                 const row = document.createElement('tr');
                 const formattedDate = progress.timestamp 
                     ? new Date(progress.timestamp).toLocaleString() 
                     : 'N/A';
+
+                // --- UPDATED: Added the Edit button back ---
                 row.innerHTML = `
                     <td>${progress.stage}</td>
                     <td>${progress.star}</td>
@@ -41,6 +40,7 @@ export async function setupDataPage(user) {
                     <td>${formattedDate}</td>
                     <td class="actions-cell">
                         <div class="action-buttons-container">
+                            <button class="action-btn edit-btn" data-id="${progress.id}">Edit</button>
                             <button class="action-btn delete-btn" data-id="${progress.id}">Delete</button>
                         </div>
                     </td>
@@ -54,25 +54,26 @@ export async function setupDataPage(user) {
     renderTable();
 
     tableBody.addEventListener('click', async (e) => {
+        if (!user) return; // Don't allow actions if not logged in
+
         const id = e.target.dataset.id;
         if (!id) return;
 
-        if (e.target.classList.contains('delete-btn')) {
+        // --- UPDATED: Added logic for the Edit button ---
+        if (e.target.classList.contains('edit-btn')) {
+            window.location.href = `index.html?edit=${id}`;
+        } 
+        else if (e.target.classList.contains('delete-btn')) {
             if (confirm('Are you sure you want to delete this entry?')) {
-                if (user) {
-                    try {
-                        await deleteDoc(doc(db, "progress", id));
-                        allProgress = allProgress.filter(p => p.id !== id);
-                    } catch (error) {
-                        console.error("Error removing document: ", error);
-                        alert("Failed to delete entry from cloud.");
-                        return;
-                    }
-                } else {
-                    allProgress = allProgress.filter(p => p.id.toString() !== id);
-                    localStorage.setItem('progress', JSON.stringify(allProgress));
+                try {
+                    await deleteDoc(doc(db, "submissions", id));
+                    // Refetch and re-render to ensure data is fresh
+                    await fetchData();
+                    renderTable();
+                } catch (error) {
+                    console.error("Error removing document: ", error);
+                    alert("Failed to delete entry from cloud.");
                 }
-                renderTable();
             }
         }
     });

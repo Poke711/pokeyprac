@@ -18,7 +18,6 @@ body {
     color: var(--primary-text-color);
 }
 
-/* --- CORRECTED: Header and Navigation Styles --- */
 header {
     background-color: var(--header-bg);
     padding: 1rem 2rem;
@@ -27,20 +26,25 @@ header {
     align-items: center;
     flex-wrap: wrap; /* Allows items to stack on small screens */
     gap: 1rem;
-    min-height: 5rem;          /* Enforces a minimum height to prevent shifting */
-    box-sizing: border-box;      /* Ensures padding is included in the height calculation */
+    min-height: 5rem;
+    box-sizing: border-box;
 }
 
+/* --- UPDATED: This rule forces the container to take up flexible space --- */
 .header-left {
     display: flex;
     align-items: center;
     gap: 2rem;
+    flex: 1; /* <-- ADD THIS */
 }
 
+/* --- UPDATED: This rule balances the left side and pushes content to the right --- */
 .header-right {
     display: flex;
     align-items: center;
+    justify-content: flex-end; /* <-- ADD THIS */
     gap: 1rem;
+    flex: 1; /* <-- ADD THIS */
 }
 
 #user-info {
@@ -54,8 +58,8 @@ header h1 {
 
 
 .header-icon {
-    height: 4rem; /* Adjust this value to get the size you want */
-    width: 4rem;   /* This maintains the original aspect ratio */
+    height: 4rem;
+    width: 4rem;
 }
 
 nav a {
@@ -75,6 +79,7 @@ nav a:hover {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    /* This element will now be centered between the two flex: 1 containers */
 }
 
 #category-container label {
@@ -130,6 +135,7 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    padding-right: 2rem;
 }
 
 button {

@@ -3,7 +3,7 @@
 import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
 import { showSuccessPopup } from './utils.js';
-import { db } from './auth.js';
+import { db, triggerLogin } from './auth.js';
 import { collection, addDoc, doc, getDoc, updateDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // --- DOM Element References ---
@@ -12,6 +12,7 @@ const stageSelect = document.getElementById('stage-select');
 const starSelect = document.getElementById('star-select');
 const form = document.getElementById('progress-form');
 const linkContainer = document.getElementById('ukikipedia-link-container');
+const submitButton = document.getElementById('submit-progress-button');
 
 // --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
@@ -157,13 +158,22 @@ export function setupInputPage(user) {
     loadDataForEditing(); // Load data if in edit mode
 
     if (!user) {
-        Array.from(form.elements).forEach(element => element.disabled = true);
-        form.querySelector('button').textContent = 'Please Log In to Add Progress';
+        Array.from(form.elements).forEach(element => {
+            // Keep the submit button enabled, disable everything else
+            if(element.tagName !== 'BUTTON') {
+                element.disabled = true;
+            }
+        });
+        submitButton.textContent = 'Please Log In to Add Progress';
     }
 
-    form.addEventListener('submit', async (e) => {
+    submitButton.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (!user) { alert("You must be logged in."); return; }
+        if (!user) {
+            triggerLogin();
+            // ...trigger the login flow instead of showing an alert.
+            return;
+        }
         if (!starSelect.value) { alert("No star selected."); return; }
 
         const progressData = {

@@ -1,7 +1,7 @@
 // js/auth.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect,signInWithPopup, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -19,47 +19,54 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-const loginButton = document.getElementById("login-button");
-const userInfo = document.getElementById("user-info");
-
-// THE FIX: A flag to prevent reloading on the initial page load.
-let isInitialAuthCheck = true;
-
-// Handle the result of the redirect when the user comes back from Google
-getRedirectResult(auth)
-  .catch((error) => {
-    console.error("Redirect Result Error:", error);
-  });
-
-export const authReady = new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
-        // This part updates the UI on every auth state change
-        if (user) {
-            if(userInfo) userInfo.textContent = `Welcome, ${user.displayName}`;
-            if(loginButton) loginButton.textContent = "Log Out";
-        } else {
-            if(userInfo) userInfo.textContent = "";
-            if(loginButton) loginButton.textContent = "Log In";
-        }
-
-        if (isInitialAuthCheck) {
-            // On the first run, we just resolve the promise and flip the flag.
-            isInitialAuthCheck = false;
-            resolve(user);
-        } else {
-            // On any subsequent run (a login or logout), we reload the page.
-            location.reload();
-        }
+/**
+ * This is the definitive function to get the user's state on page load.
+ * It handles both redirect results and existing sessions correctly, eliminating race conditions.
+ */
+export async function initializeAuth() {
+    // First, try to get the result of a redirect.
+    // This will contain the user object if a login just completed.
+    const result = await getRedirectResult(auth).catch(error => {
+        console.error("Error during getRedirectResult:", error);
+        return null; // Don't block the app if there's a minor redirect error
     });
-});
 
-if (loginButton) {
-    loginButton.addEventListener("click", () => {
-        if (auth.currentUser) {
-            signOut(auth); // This will trigger onAuthStateChanged, which will cause the reload.
-        } else {
-            signInWithRedirect(auth, provider); // This navigates away, so no immediate action is needed.
-        }
+    if (result) {
+        // If a redirect just happened, the user is in the result. This is the most reliable source.
+        return result.user;
+    } else {
+        // If there was no redirect, we check for an existing session.
+        // We wrap onAuthStateChanged in a promise that resolves on the first check.
+        return new Promise((resolve) => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                unsubscribe(); // We only need this for the initial load, so we clean it up.
+                resolve(user); // Resolve with the user (or null if they are not logged in).
+            });
+        });
+    }
+}
+
+// Reusable function to trigger the login flow
+export function triggerLogin() {
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            // A successful login will trigger the main onAuthStateChanged listener in main.js,
+            // which will handle the page reload.
+            console.log("Popup login successful for:", result.user.displayName);
+            location.reload();
+        })
+        .catch((error) => {
+            // This will catch errors like the user closing the popup.
+            console.error("Popup login error:", error.code, error.message);
+            location.reload();
+        });
+}
+
+// Reusable function to trigger logout and ensure a clean state
+export function triggerLogout() {
+    signOut(auth).then(() => {
+        // Reloading after sign-out is the most reliable way to reset the app state.
+        location.reload();
     });
 }
 

@@ -288,6 +288,7 @@ export function setupInputPage(user) {
         if (!starSelect.value) { alert("No star selected."); return; }
 
         const progressData = {
+            category: categorySelect.value,
             stage: stageSelect.value,
             star: starSelect.value,
             streak: hiddenStreakInput.value,

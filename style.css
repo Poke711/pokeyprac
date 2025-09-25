@@ -37,6 +37,16 @@ header {
     gap: 2rem;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#user-info {
+    font-weight: bold;
+}
+
 header h1 {
     margin: 0;
     font-size: 1.5rem;

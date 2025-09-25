@@ -3,6 +3,8 @@
 import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
 import { showSuccessPopup } from './utils.js';
+import { db } from './auth.js';
+import { collection, addDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // --- DOM Element References ---
 const categorySelect = document.getElementById('category-select');
@@ -34,7 +36,7 @@ function updateUkikipediaLink() {
     linkContainer.innerHTML = `
         <a href="${url}" target="_blank" rel="noopener noreferrer" class="ukikipedia-button">
             View on Ukikipedia
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h- ১০a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
         </a>
     `;
 }
@@ -73,7 +75,7 @@ function populateStages() {
     stageSelect.innerHTML = '';
 
     if (!categoryData) {
-        populateStars(); // This will clear the star list
+        populateStars();
         return;
     }
 
@@ -100,87 +102,105 @@ function populateCategories() {
     });
 }
 
-// --- Recent Submissions Logic ---
-function displayRecentSubmissions() {
-    const container = document.getElementById('recent-submissions-container');
-    if (!container) return;
-    const allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-    const recentThree = allProgress.slice(-3).reverse();
-    container.innerHTML = '';
-    if (recentThree.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #888;">No submissions yet.</p>';
-        return;
-    }
-    recentThree.forEach(progress => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'recent-item';
-        itemDiv.innerHTML = `
-            <div class="recent-info">
-                <p class="star-name">${progress.star}</p>
-                <p class="stage-name">${progress.stage}</p>
-                <div class="recent-stats">
-                    <p>Streak: <strong>${progress.streak || 'N/A'}</strong></p>
-                    <p>Time: <strong>${progress.xcam || 'N/A'}</strong></p>
-                </div>
-            </div>
-            <button class="copy-btn" data-id="${progress.id}">Copy</button>
-        `;
-        container.appendChild(itemDiv);
-    });
-}
-
 // --- Main Setup Function ---
-export function setupInputPage() {
-    // Attach event listeners
+export function setupInputPage(user) {
+    let recentSubmissionsData = [];
+
+    async function displayRecentSubmissions() {
+        const container = document.getElementById('recent-submissions-container');
+        if (!container) return;
+
+        if (user) {
+            const q = query(collection(db, "progress"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(3));
+            const querySnapshot = await getDocs(q);
+            recentSubmissionsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } else {
+            const allProgress = JSON.parse(localStorage.getItem('progress')) || [];
+            recentSubmissionsData = allProgress.slice(-3).reverse();
+        }
+
+        container.innerHTML = '';
+        if (recentSubmissionsData.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #888;">No submissions yet.</p>';
+            return;
+        }
+
+        recentSubmissionsData.forEach(progress => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'recent-item';
+            itemDiv.innerHTML = `
+                <div class="recent-info">
+                    <p class="star-name">${progress.star}</p>
+                    <p class="stage-name">${progress.stage}</p>
+                    <div class="recent-stats">
+                        <p>Streak: <strong>${progress.streak || 'N/A'}</strong></p>
+                        <p>Time: <strong>${progress.xcam || 'N/A'}</strong></p>
+                    </div>
+                </div>
+                <button class="copy-btn" data-id="${progress.id}">Copy</button>
+            `;
+            container.appendChild(itemDiv);
+        });
+    }
+
     categorySelect.addEventListener('change', populateStages);
     stageSelect.addEventListener('change', populateStars);
     starSelect.addEventListener('change', updateUkikipediaLink);
 
-    // Initial population
     populateCategories();
-    categorySelect.value = "120 Star"; // Default to 120 Star
+    categorySelect.value = "120 Star";
     populateStages();
 
-    // Form submission logic
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Prevent submission if no star is selected (e.g., in 0 Star)
         if (!starSelect.value) {
             alert("Cannot add progress: no star selected.");
             return;
         }
 
         const progressData = {
-            id: Date.now(),
             stage: stageSelect.value,
             star: starSelect.value,
             streak: form.streak.value,
             xcam: form.xcam.value,
             timestamp: new Date().toISOString(),
         };
-        let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-        allProgress.push(progressData);
-        localStorage.setItem('progress', JSON.stringify(allProgress));
+
+        if (user) {
+            try {
+                await addDoc(collection(db, "progress"), {
+                    ...progressData,
+                    userId: user.uid
+                });
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Failed to save progress to cloud.");
+                return;
+            }
+        } else {
+            progressData.id = Date.now();
+            let allProgress = JSON.parse(localStorage.getItem('progress')) || [];
+            allProgress.push(progressData);
+            localStorage.setItem('progress', JSON.stringify(allProgress));
+        }
+
         showSuccessPopup('Progress saved successfully!');
         form.streak.value = '';
         form.xcam.value = '';
         displayRecentSubmissions();
     });
 
-    // Recent submissions "Copy" logic
     const recentContainer = document.getElementById('recent-submissions-container');
     recentContainer.addEventListener('click', (e) => {
         const copyButton = e.target.closest('.copy-btn');
         if (copyButton) {
-            const id = parseInt(copyButton.dataset.id);
-            const allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-            const progressToCopy = allProgress.find(p => p.id === id);
+            const id = copyButton.dataset.id;
+            const progressToCopy = recentSubmissionsData.find(p => p.id.toString() === id);
             if (progressToCopy) {
-                // To properly copy, we need to check if the star exists in the current category
                 const categoryData = categories[categorySelect.value];
                 const stageExists = categoryData === "ALL" || categoryData.hasOwnProperty(progressToCopy.stage);
-                const starExists = stageExists && (categoryData === "ALL" || categoryData[progressToCopy.stage].includes(progressToCopy.star));
+                const starExists = stageExists && (categoryData === "ALL" || (categoryData[progressToCopy.stage] && categoryData[progressToCopy.stage].includes(progressToCopy.star)));
 
                 if (!starExists) {
                     alert(`'${progressToCopy.star}' is not in the currently selected '${categorySelect.value}' category. Please switch categories to copy this entry.`);
@@ -188,7 +208,7 @@ export function setupInputPage() {
                 }
 
                 stageSelect.value = progressToCopy.stage;
-                populateStars(); // Repopulate stars for the copied stage
+                populateStars();
                 starSelect.value = progressToCopy.star;
                 form.streak.value = progressToCopy.streak;
                 form.xcam.value = progressToCopy.xcam;

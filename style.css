@@ -256,3 +256,34 @@ td { background-color: var(--surface-color); }
 #streak-custom-btn {
     -moz-appearance: textfield; /* Firefox */
 }
+
+.xcam-input-wrapper {
+    display: flex;
+    align-items: center;
+    /* ADD THIS: Creates the space between the input and the buttons */
+    gap: 0.5rem;
+}
+
+#xcam-input {
+    /* REMOVED the styles that merged the input with the buttons */
+    flex-grow: 1;
+}
+
+.xcam-stepper-btn {
+    padding: 0.75rem;
+    width: 50px;
+    border: 1px solid var(--border-color);
+    background-color: #3e3852;
+    color: var(--primary-text-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.2s;
+    /* ADD THIS: Ensures all buttons have fully rounded corners now */
+    border-radius: 5px;
+}
+
+.xcam-stepper-btn:hover {
+    background-color: #4f486a;
+}

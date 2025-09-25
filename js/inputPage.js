@@ -2,7 +2,7 @@
 
 import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
-import { showSuccessPopup } from './utils.js';
+import { showSuccessPopup, correctXCamTime } from './utils.js';
 import { db, triggerLogin } from './auth.js';
 import { collection, addDoc, doc, getDoc, setDoc, updateDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -13,11 +13,15 @@ const starSelect = document.getElementById('star-select');
 const form = document.getElementById('progress-form');
 const linkContainer = document.getElementById('ukikipedia-link-container');
 const submitButton = document.getElementById('submit-progress-button');
-// References for the streak button UI ---
 const streakButtonsContainer = document.getElementById('streak-buttons-container');
 const streakBtns = document.querySelectorAll('.streak-btn');
 const hiddenStreakInput = document.getElementById('streak-value-hidden');
 const customStreakBtn = document.getElementById('streak-custom-btn');
+// --- NEW: References for X-Cam Stepper ---
+const xcamInput = document.getElementById('xcam-input');
+const xcamDecrementBtn = document.getElementById('xcam-decrement');
+const xcamIncrementBtn = document.getElementById('xcam-increment');
+const FRAME_TIME = 0.03; // Time per frame in SM64
 
 // --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
@@ -92,7 +96,6 @@ function populateCategories() {
     });
 }
 
-
 // --- Main Setup Function ---
 export function setupInputPage(user) {
     let recentSubmissionsData = [];
@@ -100,17 +103,14 @@ export function setupInputPage(user) {
     const editId = urlParams.get('edit');
     let saveTimeout;
 
-    // --- NEW HELPER FUNCTION: Updates the streak button UI based on a value ---
     function updateStreakButtonsUI(value) {
         if (!value) {
             streakBtns.forEach(btn => btn.classList.remove('active'));
             hiddenStreakInput.value = '';
             return;
         }
-
         streakBtns.forEach(btn => btn.classList.remove('active'));
         const presetBtn = streakButtonsContainer.querySelector(`.streak-btn[data-value="${value}"]`);
-
         if (presetBtn) {
             presetBtn.classList.add('active');
         } else {
@@ -183,10 +183,7 @@ export function setupInputPage(user) {
                 stageSelect.value = data.stage;
                 populateStars();
                 starSelect.value = data.star;
-                
-                // --- UPDATED: Use the new helper function to set the streak UI ---
                 updateStreakButtonsUI(data.streak);
-                
                 form.xcam.value = data.xcam;
                 submitButton.textContent = 'Update Progress';
                 updateUkikipediaLink();
@@ -212,6 +209,55 @@ export function setupInputPage(user) {
             saveCustomStreakValue(customStreakBtn.value);
         }, 1000);
     });
+
+
+    xcamIncrementBtn.addEventListener('click', () => {
+        let currentValue = parseFloat(xcamInput.value) || 0;
+        const currentHundredths = Math.round(currentValue * 100);
+        let newHundredths = currentHundredths + 3;
+        if (newHundredths % 10 === 9) {
+            newHundredths += 1;
+        }
+        xcamInput.value = (newHundredths / 100).toFixed(2);
+    });
+
+    xcamDecrementBtn.addEventListener('click', () => {
+        let currentValue = parseFloat(xcamInput.value) || 0;
+        let currentHundredths = Math.round(currentValue * 100);
+
+        if (currentHundredths <= 0) {
+            xcamInput.value = "0.00";
+            return;
+        }
+        
+        // This new logic correctly implements the inverse pattern (-4, -3, -3)
+        let newHundredths;
+        const remainder = currentHundredths % 10;
+
+        if (remainder === 0) {
+            // If the value ends in .x0 (e.g., 12.20), subtract 4 to get to .x6
+            newHundredths = currentHundredths - 4;
+        } else if (remainder === 6) {
+            // If the value ends in .x6 (e.g., 12.16), subtract 3 to get to .x3
+            newHundredths = currentHundredths - 3;
+        } else { // This handles .x3 and any manually entered numbers
+            // If the value ends in .x3 (e.g., 12.13), subtract 3 to get to .x0
+            newHundredths = currentHundredths - 3;
+        }
+        
+        xcamInput.value = (newHundredths / 100).toFixed(2);
+    });
+
+    // The blur event now uses the simpler, more correct function
+    xcamInput.addEventListener('blur', () => {
+        const value = parseFloat(xcamInput.value);
+        if (isNaN(value)) {
+            xcamInput.value = '';
+            return;
+        }
+        xcamInput.value = correctXCamTime(value);
+    });
+
 
     categorySelect.addEventListener('change', populateStages);
     stageSelect.addEventListener('change', populateStars);
@@ -261,11 +307,8 @@ export function setupInputPage(user) {
                     timestamp: new Date().toISOString()
                 });
                 showSuccessPopup('Progress saved!');
-
-                // --- UPDATED: Manually clear fields instead of using form.reset() ---
-                form.xcam.value = ''; // Clear x-cam time
-                updateStreakButtonsUI(null); // Clear streak buttons and hidden value
-
+                form.xcam.value = '';
+                updateStreakButtonsUI(null);
                 displayRecentSubmissions();
             }
         } catch (error) {
@@ -292,10 +335,7 @@ export function setupInputPage(user) {
                 stageSelect.value = progressToCopy.stage;
                 populateStars();
                 starSelect.value = progressToCopy.star;
-
-                // --- UPDATED: Use the new helper function to set the streak UI ---
                 updateStreakButtonsUI(progressToCopy.streak);
-
                 form.xcam.value = progressToCopy.xcam;
                 updateUkikipediaLink();
                 window.scrollTo(0, 0);

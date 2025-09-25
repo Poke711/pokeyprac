@@ -47,7 +47,11 @@
             <input type="hidden" id="streak-value-hidden" name="streak">
 
             <label for="xcam-input">X-Cam Time:</label>
-            <input type="text" id="xcam-input" name="xcam">
+            <div class="xcam-input-wrapper">
+                <input type="text" id="xcam-input" name="xcam" placeholder="e.g., 13.36">
+                <button type="button" id="xcam-decrement" class="xcam-stepper-btn" tabindex="-1">-</button>
+                <button type="button" id="xcam-increment" class="xcam-stepper-btn" tabindex="-1">+</button>
+            </div>
 
             <button type="button" id="submit-progress-button">Add Progress</button>
         </form>

@@ -1,11 +1,9 @@
 // js/graphsPage.js
-import { db } from './auth.js';
-import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getAllSubmissions } from './dataManager.js';
 
-// Chart instances
 let streakChart;
 let xcamChart;
-let allProgress = []; // Module-level variable to hold data
+let allProgress = [];
 
 function updateGraphs() {
     const stageSelect = document.getElementById('graph-stage-select');
@@ -104,11 +102,6 @@ function populateStarSelect() {
     const stars = [...new Set(allProgress.filter(p => p.stage === selectedStage).map(p => p.star))];
 
     starSelect.innerHTML = '';
-    if (stars.length === 0) {
-        updateGraphs();
-        return;
-    }
-
     stars.forEach(star => {
         const option = document.createElement('option');
         option.value = star;
@@ -127,6 +120,8 @@ function populateStageSelect() {
         const option = document.createElement('option');
         option.textContent = "No data available to graph";
         stageSelect.appendChild(option);
+        if (streakChart) streakChart.destroy();
+        if (xcamChart) xcamChart.destroy();
         populateStarSelect();
         return;
     }
@@ -141,13 +136,7 @@ function populateStageSelect() {
 }
 
 export async function setupGraphsPage(user) {
-    if (user) {
-        const q = query(collection(db, "progress"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        allProgress = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } else {
-        allProgress = JSON.parse(localStorage.getItem('progress')) || [];
-    }
+    allProgress = await getAllSubmissions(user);
 
     const stageSelect = document.getElementById('graph-stage-select');
     const starSelect = document.getElementById('graph-star-select');

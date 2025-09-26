@@ -3,8 +3,9 @@
 import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
 import { showSuccessPopup, correctXCamTime } from './utils.js';
-import { db, triggerLogin } from './auth.js';
-import { collection, addDoc, doc, getDoc, setDoc, updateDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { triggerLogin } from './auth.js';
+// NEW: Import from dataManager
+import { saveUserSetting, loadUserSetting, getAllSubmissions, getSubmission, saveSubmission, updateSubmission } from './dataManager.js';
 
 // --- DOM Element References ---
 const categorySelect = document.getElementById('category-select');
@@ -17,11 +18,9 @@ const streakButtonsContainer = document.getElementById('streak-buttons-container
 const streakBtns = document.querySelectorAll('.streak-btn');
 const hiddenStreakInput = document.getElementById('streak-value-hidden');
 const customStreakBtn = document.getElementById('streak-custom-btn');
-// --- NEW: References for X-Cam Stepper ---
 const xcamInput = document.getElementById('xcam-input');
 const xcamDecrementBtn = document.getElementById('xcam-decrement');
 const xcamIncrementBtn = document.getElementById('xcam-increment');
-const FRAME_TIME = 0.03; // Time per frame in SM64
 
 // --- Ukikipedia Link Logic ---
 function generateUkikipediaUrl(stage, star) {
@@ -44,7 +43,7 @@ function updateUkikipediaLink() {
     linkContainer.innerHTML = `
         <a href="${url}" target="_blank" rel="noopener noreferrer" class="ukikipedia-button">
             View on Ukikipedia
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5-.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
         </a>
     `;
 }
@@ -96,6 +95,7 @@ function populateCategories() {
     });
 }
 
+
 // --- Main Setup Function ---
 export function setupInputPage(user) {
     let recentSubmissionsData = [];
@@ -120,37 +120,30 @@ export function setupInputPage(user) {
         hiddenStreakInput.value = value;
     }
 
+    // UPDATED: Uses dataManager
     async function loadCustomStreakValue() {
-        if (user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists() && userSnap.data().customStreakValue) {
-                customStreakBtn.value = userSnap.data().customStreakValue;
-            } else {
-                customStreakBtn.value = 5;
-            }
-        }
+        const value = await loadUserSetting(user, 'customStreakValue', 5);
+        customStreakBtn.value = value;
     }
 
+    // UPDATED: Uses dataManager
     async function saveCustomStreakValue(value) {
-        if (user) {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, { customStreakValue: value }, { merge: true });
-        }
+        await saveUserSetting(user, 'customStreakValue', value);
     }
 
+    // UPDATED: Uses dataManager and works whether logged in or out
     async function displayRecentSubmissions() {
         const container = document.getElementById('recent-submissions-container');
         if (!container) return;
-        recentSubmissionsData = [];
-        container.innerHTML = '<p style="text-align: center; color: #888;">Log in to see your recent submissions.</p>';
-        if (user) {
-            const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(3));
-            const querySnapshot = await getDocs(q);
-            recentSubmissionsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (recentSubmissionsData.length > 0) {
+        
+        container.innerHTML = `<p style="text-align: center; color: #888;">Loading recent submissions...</p>`;
+        
+        recentSubmissionsData = await getAllSubmissions(user);
+        const recentThree = recentSubmissionsData.slice(0, 3);
+
+        if (recentThree.length > 0) {
                 container.innerHTML = '';
-                recentSubmissionsData.forEach(progress => {
+            recentThree.forEach(progress => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'recent-item';
                     itemDiv.innerHTML = `
@@ -167,18 +160,25 @@ export function setupInputPage(user) {
                     container.appendChild(itemDiv);
                 });
             } else {
-                container.innerHTML = '<p style="text-align: center; color: #888;">No submissions yet.</p>';
+            const message = user 
+                ? 'No submissions yet. Add one above!' 
+                : 'No local submissions yet. Your progress will be saved here.';
+            container.innerHTML = `<p style="text-align: center; color: #888;">${message}</p>`;
             }
         }
-    }
     
+    // UPDATED: Uses dataManager and prevents editing when logged out
     async function loadDataForEditing() {
-        if (editId && user) {
-            const docRef = doc(db, "submissions", editId);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists() && docSnap.data().userId === user.uid) {
-                const data = docSnap.data();
-                categorySelect.value = "120 Star";
+        if (!editId) return;
+        if (!user) {
+            alert("Please log in to edit submissions.");
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        const data = await getSubmission(user, editId);
+        if (data) {
+            categorySelect.value = data.category || "120 Star";
                 populateStages();
                 stageSelect.value = data.stage;
                 populateStars();
@@ -190,7 +190,6 @@ export function setupInputPage(user) {
             } else {
                 alert("Could not load data for editing. It may have been deleted or you don't have permission.");
                 window.location.href = 'index.html';
-            }
         }
     }
     
@@ -211,6 +210,7 @@ export function setupInputPage(user) {
     });
 
 
+    // --- X-Cam Event Listeners (No changes needed here, but included for context) ---
     xcamIncrementBtn.addEventListener('click', () => {
         let currentValue = parseFloat(xcamInput.value) || 0;
         const currentHundredths = Math.round(currentValue * 100);
@@ -230,34 +230,25 @@ export function setupInputPage(user) {
             return;
         }
         
-        // This new logic correctly implements the inverse pattern (-4, -3, -3)
         let newHundredths;
         const remainder = currentHundredths % 10;
 
         if (remainder === 0) {
-            // If the value ends in .x0 (e.g., 12.20), subtract 4 to get to .x6
             newHundredths = currentHundredths - 4;
         } else if (remainder === 6) {
-            // If the value ends in .x6 (e.g., 12.16), subtract 3 to get to .x3
             newHundredths = currentHundredths - 3;
-        } else { // This handles .x3 and any manually entered numbers
-            // If the value ends in .x3 (e.g., 12.13), subtract 3 to get to .x0
+        } else {
             newHundredths = currentHundredths - 3;
         }
         
         xcamInput.value = (newHundredths / 100).toFixed(2);
     });
 
-    // The blur event now uses the simpler, more correct function
+    // The blur event now uses the NEW, custom rounding function
     xcamInput.addEventListener('blur', () => {
-        const value = parseFloat(xcamInput.value);
-        if (isNaN(value)) {
-            xcamInput.value = '';
-            return;
-        }
-        xcamInput.value = correctXCamTime(value);
+        // The value is passed to the new function, which handles all the logic.
+        xcamInput.value = correctXCamTime(xcamInput.value);
     });
-
 
     categorySelect.addEventListener('change', populateStages);
     stageSelect.addEventListener('change', populateStars);
@@ -268,23 +259,13 @@ export function setupInputPage(user) {
     loadCustomStreakValue();
     loadDataForEditing();
 
+    submitButton.textContent = editId ? 'Update Progress' : 'Add Progress';
     if (!user) {
-        Array.from(form.elements).forEach(element => {
-            if (element.tagName !== 'BUTTON') {
-                element.disabled = true;
-            }
-        });
-        submitButton.textContent = 'Please Log In to Add Progress';
-    } else {
-        submitButton.textContent = editId ? 'Update Progress' : 'Add Progress';
+        submitButton.textContent = 'Save Locally';
     }
 
     submitButton.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (!user) {
-            triggerLogin();
-            return;
-        }
         if (!starSelect.value) { alert("No star selected."); return; }
 
         const progressData = {
@@ -297,17 +278,13 @@ export function setupInputPage(user) {
 
         try {
             if (editId) {
-                const docRef = doc(db, "submissions", editId);
-                await updateDoc(docRef, progressData);
+                await updateSubmission(user, editId, progressData);
                 showSuccessPopup('Progress updated!');
                 setTimeout(() => window.location.href = 'data.html', 1500);
             } else {
-                await addDoc(collection(db, "submissions"), {
-                    ...progressData,
-                    userId: user.uid,
-                    timestamp: new Date().toISOString()
-                });
-                showSuccessPopup('Progress saved!');
+                await saveSubmission(user, progressData);
+                const message = user ? 'Progress saved!' : 'Progress saved locally!';
+                showSuccessPopup(message);
                 form.xcam.value = '';
                 updateStreakButtonsUI(null);
                 displayRecentSubmissions();
@@ -325,13 +302,9 @@ export function setupInputPage(user) {
             const id = copyButton.dataset.id;
             const progressToCopy = recentSubmissionsData.find(p => p.id === id);
             if (progressToCopy) {
-                const categoryData = categories[categorySelect.value];
-                const stageExists = categoryData === "ALL" || categoryData.hasOwnProperty(progressToCopy.stage);
-                const starExists = stageExists && (categoryData === "ALL" || (categoryData[progressToCopy.stage] && categoryData[progressToCopy.stage].includes(progressToCopy.star)));
-
-                if (!starExists) {
-                    alert(`'${progressToCopy.star}' is not in the currently selected '${categorySelect.value}' category.`);
-                    return;
+                if (progressToCopy.category) {
+                    categorySelect.value = progressToCopy.category;
+                    populateStages();
                 }
                 stageSelect.value = progressToCopy.stage;
                 populateStars();

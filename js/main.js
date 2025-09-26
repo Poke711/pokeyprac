@@ -1,9 +1,9 @@
-// js/main.js
-
-import { initializeAuth, triggerLogin, triggerLogout } from './auth.js'; 
+import { initializeAuth, triggerLogin, triggerLogout } from './auth.js';
 import { setupInputPage } from './inputPage.js';
 import { setupDataPage } from './dataPage.js';
 import { setupGraphsPage } from './graphsPage.js';
+// ADDED: Import the sync function from the data manager
+import { syncLocalDataToFirestore } from './dataManager.js';
 
 // This function sets up the header and login/logout buttons
 function setupGlobalUI(user) {
@@ -13,7 +13,7 @@ function setupGlobalUI(user) {
     if (loginButton) {
         loginButton.addEventListener("click", () => {
             if (user) {
-                triggerLogout(); // This function now handles its own reload
+                triggerLogout();
             } else {
                 triggerLogin();
             }
@@ -25,15 +25,28 @@ function setupGlobalUI(user) {
         if(loginButton) loginButton.textContent = "Log Out";
     } else {
         if(userInfo) userInfo.textContent = "";
-        if(loginButton) loginButton.textContent = "Log In";
+        if(loginButton) loginButton.textContent = "Log In to Sync";
     }
 }
 
 // --- Main Application Entry Point ---
 async function main() {
-    // 1. Call our new definitive function and wait for the correct user state.
+    // 1. Call our definitive function and wait for the correct user state.
     const user = await initializeAuth();
-    console.log("Firebase Auth Ready. User:", user); 
+
+    // Check if the user is now logged in AND if there is local data waiting to be synced.
+    const localData = localStorage.getItem('pokeyprac_submissions');
+    if (user && localData && localData.length > 2) { // check for more than just '[]'
+        const result = await syncLocalDataToFirestore(user);
+        if (result.synced > 0) {
+            alert(`${result.synced} local submission(s) have been synced to your account! The page will now reload to show your updated data.`);
+            // Reload to ensure all pages fetch the newly synced data from Firestore
+            location.reload();
+            return; // Stop further execution on this load, as the page will reload.
+        }
+    }
+    // --- End of Sync Logic ---
+
     // 2. Set up the header and login/logout button functionality.
     setupGlobalUI(user);
 

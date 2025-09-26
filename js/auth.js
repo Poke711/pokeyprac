@@ -52,12 +52,11 @@ export function triggerLogin() {
         .then((result) => {
             // A successful login will trigger the main onAuthStateChanged listener in main.js,
             // which will handle the page reload.
-            console.log("Popup login successful for:", result.user.displayName);
             location.reload();
         })
         .catch((error) => {
             // This will catch errors like the user closing the popup.
-            console.error("Popup login error:", error.code, error.message);
+    
             location.reload();
         });
 }

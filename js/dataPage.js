@@ -1,8 +1,14 @@
 // js/dataPage.js
 import { getAllSubmissions, deleteSubmission } from './dataManager.js';
+import { triggerLogin } from './auth.js'; // <-- ADDED: Import triggerLogin
 
 export async function setupDataPage(user) {
     const tableBody = document.querySelector('#progress-table tbody');
+    if (!tableBody) {
+        console.error("Data page setup failed: Could not find '#progress-table tbody'.");
+        return;
+    }
+    
     let allProgress = [];
 
     async function fetchDataAndRender() {
@@ -27,9 +33,8 @@ export async function setupDataPage(user) {
                 ? new Date(progress.timestamp).toLocaleString() 
                 : 'N/A';
             
-            const editButton = progress.isLocal
-                ? `<button class="action-btn edit-btn" disabled title="Log in to sync and edit">Edit</button>`
-                : `<button class="action-btn edit-btn" data-id="${progress.id}">Edit</button>`;
+            // UPDATED: The button is no longer disabled. We add a title to guide the user.
+            const editButton = `<button class="action-btn edit-btn" data-id="${progress.id}" title="${progress.isLocal ? 'Log in to sync and edit' : 'Edit this entry'}">Edit</button>`;
 
             row.innerHTML = `
                 <td>${progress.stage}</td>
@@ -57,8 +62,17 @@ export async function setupDataPage(user) {
         const id = button.dataset.id;
         if (!id) return;
 
+        // UPDATED: New logic for the edit button
         if (button.classList.contains('edit-btn')) {
-            window.location.href = `index.html?edit=${id}`;
+            // Check if the user is logged in
+            if (user) {
+                // If logged in, proceed to the edit page as normal
+                window.location.href = `index.html?edit=${id}`;
+            } else {
+                // If not logged in, alert them and trigger the login flow
+                alert("Please log in to edit and sync your submissions.");
+                triggerLogin();
+            }
         } 
         else if (button.classList.contains('delete-btn')) {
             if (confirm('Are you sure you want to delete this entry?')) {

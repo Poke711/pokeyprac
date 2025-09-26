@@ -111,6 +111,7 @@ export async function syncLocalDataToFirestore(user) {
         return { synced: 0 };
     }
 
+    console.log(`Starting sync of ${localSubmissions.length} local submission(s).`);
     const batch = writeBatch(db);
     localSubmissions.forEach(submission => {
         const docRef = doc(collection(db, "submissions"));
@@ -120,7 +121,9 @@ export async function syncLocalDataToFirestore(user) {
 
     try {
         await batch.commit();
-        localStorage.removeItem(LOCAL_SUBMISSIONS_KEY);
+        console.log("Local data successfully synced to Firestore.");
+        // UPDATED: Commented out the line below to prevent local data from being cleared after sync.
+        // localStorage.removeItem(LOCAL_SUBMISSIONS_KEY);
         return { synced: localSubmissions.length };
     } catch (error) {
         console.error("Error syncing local data: ", error);

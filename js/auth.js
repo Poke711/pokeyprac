@@ -19,52 +19,52 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-/**
- * This is the definitive function to get the user's state on page load.
- * It handles both redirect results and existing sessions correctly, eliminating race conditions.
- */
 export async function initializeAuth() {
-    // First, try to get the result of a redirect.
-    // This will contain the user object if a login just completed.
     const result = await getRedirectResult(auth).catch(error => {
         console.error("Error during getRedirectResult:", error);
-        return null; // Don't block the app if there's a minor redirect error
+        return null;
     });
 
     if (result) {
-        // If a redirect just happened, the user is in the result. This is the most reliable source.
         return result.user;
     } else {
-        // If there was no redirect, we check for an existing session.
-        // We wrap onAuthStateChanged in a promise that resolves on the first check.
         return new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
-                unsubscribe(); // We only need this for the initial load, so we clean it up.
-                resolve(user); // Resolve with the user (or null if they are not logged in).
+                unsubscribe();
+                resolve(user);
             });
         });
     }
 }
 
-// Reusable function to trigger the login flow
+// UPDATED: triggerLogin now has robust error handling for blocked popups
 export function triggerLogin() {
     signInWithPopup(auth, provider)
         .then((result) => {
-            // A successful login will trigger the main onAuthStateChanged listener in main.js,
+            // A successful login will trigger the main onAuthStateChanged listener,
             // which will handle the page reload.
+            console.log("Popup login successful for:", result.user.displayName);
             location.reload();
         })
         .catch((error) => {
-            // This will catch errors like the user closing the popup.
-    
-            location.reload();
+            // Check for the specific error when a browser blocks the popup.
+            if (error.code === 'auth/popup-blocked-by-browser') {
+                alert('Your browser blocked the login popup.\n\nPlease allow popups for this site in your browser settings and try again.');
+            } 
+            // This error occurs if the user manually closes the popup. We can ignore it silently.
+            else if (error.code === 'auth/cancelled-popup-request') {
+                console.log("User cancelled the login process.");
+            } 
+            // For all other errors, show a generic message.
+            else {
+                console.error("Popup login error:", error.code, error.message);
+                alert(`An unexpected error occurred during login. Please try again.\n\nError: ${error.message}`);
+            }
         });
 }
 
-// Reusable function to trigger logout and ensure a clean state
 export function triggerLogout() {
     signOut(auth).then(() => {
-        // Reloading after sign-out is the most reliable way to reset the app state.
         location.reload();
     });
 }

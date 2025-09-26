@@ -1,8 +1,9 @@
+// js/main.js
+
 import { initializeAuth, triggerLogin, triggerLogout } from './auth.js';
 import { setupInputPage } from './inputPage.js';
 import { setupDataPage } from './dataPage.js';
 import { setupGraphsPage } from './graphsPage.js';
-// ADDED: Import the sync function from the data manager
 import { syncLocalDataToFirestore } from './dataManager.js';
 
 // This function sets up the header and login/logout buttons
@@ -33,19 +34,25 @@ function setupGlobalUI(user) {
 async function main() {
     // 1. Call our definitive function and wait for the correct user state.
     const user = await initializeAuth();
+    console.log("Firebase Auth Ready. User:", user);
 
-    // Check if the user is now logged in AND if there is local data waiting to be synced.
+    // --- UPDATED: Sync logic with sessionStorage flag to prevent loops ---
     const localData = localStorage.getItem('pokeyprac_submissions');
-    if (user && localData && localData.length > 2) { // check for more than just '[]'
+    // Check for user, local data, AND ensure the sync hasn't already run in this session.
+    if (user && localData && localData.length > 2 && !sessionStorage.getItem('syncCompleted')) {
         const result = await syncLocalDataToFirestore(user);
+        
+        // IMPORTANT: Set the flag in sessionStorage AFTER a successful sync.
+        // This flag will persist through reloads but will be cleared when the tab is closed.
+        sessionStorage.setItem('syncCompleted', 'true');
+
         if (result.synced > 0) {
             alert(`${result.synced} local submission(s) have been synced to your account! The page will now reload to show your updated data.`);
-            // Reload to ensure all pages fetch the newly synced data from Firestore
             location.reload();
-            return; // Stop further execution on this load, as the page will reload.
+            return; // Stop further execution, the page is reloading.
         }
     }
-    // --- End of Sync Logic ---
+    // --- End of Updated Sync Logic ---
 
     // 2. Set up the header and login/logout button functionality.
     setupGlobalUI(user);

@@ -19,12 +19,13 @@
         </div>
         <div class="header-right">
             <div id="user-info"></div>
+            <!-- ADDED: The new Force Sync button, hidden by default -->
+            <button id="force-sync-button" class="button" style="display: none;" title="Upload locally saved data to your account">Sync Local Data</button>
             <button id="login-button" class="button">Log In</button>
         </div>
     </header>
     
     <main class="data-main">
-        <!-- CRITICAL: Ensure this ID exactly matches "progress-table" -->
         <table id="progress-table">
             <thead>
                 <tr>

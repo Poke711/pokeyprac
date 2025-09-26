@@ -26,7 +26,7 @@ function setupGlobalUI(user) {
         if(loginButton) loginButton.textContent = "Log Out";
     } else {
         if(userInfo) userInfo.textContent = "";
-        if(loginButton) loginButton.textContent = "Log In";
+        if(loginButton) loginButton.textContent = "Log In to Sync";
     }
 }
 

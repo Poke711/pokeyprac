@@ -26,51 +26,56 @@ function setupGlobalUI(user) {
         if(loginButton) loginButton.textContent = "Log Out";
     } else {
         if(userInfo) userInfo.textContent = "";
-        if(loginButton) loginButton.textContent = "Log In to Sync";
+        if(loginButton) loginButton.textContent = "Log In";
     }
 }
 
 // --- Main Application Entry Point ---
 async function main() {
-    // 1. Call our definitive function and wait for the correct user state.
-    const user = await initializeAuth();
-    console.log("Firebase Auth Ready. User:", user);
+    // ADDED: Get references to the loader and content wrapper
+    const loader = document.getElementById('loader');
+    const appContent = document.getElementById('app-content');
 
-    // --- UPDATED: Sync logic with sessionStorage flag to prevent loops ---
-    const localData = localStorage.getItem('pokeyprac_submissions');
-    // Check for user, local data, AND ensure the sync hasn't already run in this session.
-    if (user && localData && localData.length > 2 && !sessionStorage.getItem('syncCompleted')) {
-        const result = await syncLocalDataToFirestore(user);
-        
-        // IMPORTANT: Set the flag in sessionStorage AFTER a successful sync.
-        // This flag will persist through reloads but will be cleared when the tab is closed.
-        sessionStorage.setItem('syncCompleted', 'true');
+    try {
+        const user = await initializeAuth();
+        console.log("Firebase Auth Ready. User:", user);
 
-        if (result.synced > 0) {
-            alert(`${result.synced} local submission(s) have been synced to your account! The page will now reload to show your updated data.`);
-            location.reload();
-            return; // Stop further execution, the page is reloading.
+        const localData = localStorage.getItem('pokeyprac_submissions');
+        if (user && localData && localData.length > 2 && !sessionStorage.getItem('syncCompleted')) {
+            const result = await syncLocalDataToFirestore(user);
+            sessionStorage.setItem('syncCompleted', 'true');
+            if (result.synced > 0) {
+                alert(`${result.synced} local submission(s) have been synced to your account! The page will now reload to show your updated data.`);
+                location.reload();
+                return;
+            }
         }
-    }
-    // --- End of Updated Sync Logic ---
 
-    // 2. Set up the header and login/logout button functionality.
-    setupGlobalUI(user);
+        setupGlobalUI(user);
 
-    // 3. Set up the logic for the specific page we're on.
-    const path = window.location.pathname;
-    const pageName = path.substring(path.lastIndexOf('/') + 1);
-    
-    const page = pageName === '' || pageName === 'index.html' || pageName.toLowerCase() === 'pokeyprac' ? 'index' : pageName.split('.')[0];
-    
-    if (page === 'index') {
-        setupInputPage(user);
-    } else if (page === 'data') {
-        setupDataPage(user);
-    } else if (page === 'graphs') {
-        setupGraphsPage(user);
+        // This uses the body ID for more reliable page detection
+        const pageId = document.body.id;
+        if (pageId === 'home-page-body') { // Make sure your index.html body has this ID
+            setupInputPage(user);
+        } else if (pageId === 'data-page-body') {
+            setupDataPage(user);
+        } else if (pageId === 'graphs-page-body') { // Make sure your graphs.html body has this ID
+            setupGraphsPage(user);
+        }
+
+    } catch (error) {
+        console.error("An error occurred during application startup:", error);
+        // Optionally display an error message to the user on the page
+        appContent.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ff8a80;"><h2>Oops! Something went wrong.</h2><p>Please try refreshing the page. Check the console for more details.</p></div>`;
+
+    } finally {
+        // UPDATED: This code runs whether startup succeeded or failed.
+        // It ensures the loader always goes away.
+        if (loader && appContent) {
+            appContent.classList.add('loaded'); // Fade in the main content
+            loader.classList.add('hidden'); // Fade out the loader
+        }
     }
 }
 
-// Run the main function when the DOM is ready.
 document.addEventListener('DOMContentLoaded', main);

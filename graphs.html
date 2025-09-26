@@ -6,49 +6,58 @@
     <title>Pokeyprac - Graphs</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <div class="header-left">
-            <img src="static/logo.svg" alt="Pokeyprac logo icon" class="header-icon">
-            <h1>Pokeyprac</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="data.html">My Submissions</a>
-                <a href="graphs.html">Graphs</a>
-            </nav>
+<body id="graphs-page-body">
+    <div id="loader">
+        <div class="loader-content">
+            <img src="static/logo.svg" alt="Pokeyprac logo icon" class="loader-icon">
+            <p>Loading...</p>
         </div>
-        <div class="header-right">
-            <div id="user-info"></div>
-            <button id="login-button">Log In to Sync</button>
-        </div>
-    </header>
-    
-    <!-- UPDATED: Added a class to the main element -->
-    <main class="graphs-main">
-        <div class="graph-page-container">
-            <h2>Progress Over Time</h2>
-            <div id="graph-controls">
-                <div class="control-group">
-                    <label for="graph-stage-select">Select a Stage:</label>
-                    <select id="graph-stage-select"></select>
+    </div>
+
+        <!-- ADDED: A wrapper for all page content -->
+        <div id="app-content">
+        <header>
+            <div class="header-left">
+                <img src="static/logo.svg" alt="Pokeyprac logo icon" class="header-icon">
+                <h1>Pokeyprac</h1>
+                <nav>
+                    <a href="index.html">Home</a>
+                    <a href="data.html">My Submissions</a>
+                    <a href="graphs.html">Graphs</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div id="user-info"></div>
+                <button id="login-button">Log In to Sync</button>
+            </div>
+        </header>
+
+        <!-- UPDATED: Added a class to the main element -->
+        <main class="graphs-main">
+            <div class="graph-page-container">
+                <h2>Progress Over Time</h2>
+                <div id="graph-controls">
+                    <div class="control-group">
+                        <label for="graph-stage-select">Select a Stage:</label>
+                        <select id="graph-stage-select"></select>
+                    </div>
+                    <div class="control-group">
+                        <label for="graph-star-select">Select a Star:</label>
+                        <select id="graph-star-select"></select>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="graph-star-select">Select a Star:</label>
-                    <select id="graph-star-select"></select>
+
+                <div id="graphs-container">
+                    <div class="chart-container">
+                        <canvas id="streak-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="xcam-chart"></canvas>
+                    </div>
                 </div>
             </div>
-
-            <div id="graphs-container">
-                <div class="chart-container">
-                    <canvas id="streak-chart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <canvas id="xcam-chart"></canvas>
-                </div>
-            </div>
-        </div>
-    </main>
-
+        </main>
+    </div>
     <!-- CDN link for the Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/main.js" type="module"></script>

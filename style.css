@@ -286,3 +286,52 @@ td { background-color: var(--surface-color); }
 .xcam-stepper-btn:hover {
     background-color: #4f486a;
 }
+#app-content {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* The state when content is loaded and ready to be shown */
+#app-content.loaded {
+    opacity: 1;
+}
+
+/* The loader overlay */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color); /* Matches your dark theme */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* The state when the loader should fade out */
+#loader.hidden {
+    opacity: 0;
+    /* Prevents the invisible loader from blocking clicks */
+    pointer-events: none; 
+}
+
+.loader-content {
+    text-align: center;
+    color: var(--text-color);
+}
+
+.loader-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+    /* Optional: add a simple spin animation */
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

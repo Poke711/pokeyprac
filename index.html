@@ -6,65 +6,74 @@
     <title>Pokeyprac - Track Progress</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <div class="header-left">
-            <img src="static/logo.svg" alt="Pokeyprac logo icon" class="header-icon">
-            <h1>Pokeyprac</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="data.html">My Submissions</a>
-                <a href="graphs.html">Graphs</a>
-            </nav>
+<body id="home-page-body">
+    <div id="loader">
+        <div class="loader-content">
+            <img src="static/logo.svg" alt="Pokeyprac logo icon" class="loader-icon">
+            <p>Loading...</p>
         </div>
-        <div id="category-container">
-            <label for="category-select">Category:</label>
-            <select id="category-select" name="category"></select>
-        </div>
-        <div class="header-right">
-            <div id="user-info"></div>
-            <button id="login-button" class="button">Log In to Sync</button>
-        </div>
-    </header>
+    </div>
 
-    <main>
-        <form id="progress-form">
-            <label for="stage-select">Stage:</label>
-            <select id="stage-select" name="stage"></select>
-
-            <label for="star-select">Star:</label>
-            <select id="star-select" name="star"></select>
-
-            <label>Streak:</label>
-            <div id="streak-buttons-container">
-                <button type="button" class="streak-btn" data-value="1">1</button>
-                <button type="button" class="streak-btn" data-value="2">2</button>
-                <button type="button" class="streak-btn" data-value="3">3</button>
-                <button type="button" class="streak-btn" data-value="4">4</button>
-                <input type="number" id="streak-custom-btn" class="streak-btn" value="5" min="1">
+    <!-- ADDED: A wrapper for all page content -->
+    <div id="app-content">
+        <header>
+            <div class="header-left">
+                <img src="static/logo.svg" alt="Pokeyprac logo icon" class="header-icon">
+                <h1>Pokeyprac</h1>
+                <nav>
+                    <a href="index.html">Home</a>
+                    <a href="data.html">My Submissions</a>
+                    <a href="graphs.html">Graphs</a>
+                </nav>
             </div>
-            <!-- Hidden input to store the actual value for submission -->
-            <input type="hidden" id="streak-value-hidden" name="streak">
-
-            <label for="xcam-input">X-Cam Time:</label>
-            <div class="xcam-input-wrapper">
-                <input type="text" id="xcam-input" name="xcam" placeholder="e.g., 13.36">
-                <button type="button" id="xcam-decrement" class="xcam-stepper-btn" tabindex="-1">-</button>
-                <button type="button" id="xcam-increment" class="xcam-stepper-btn" tabindex="-1">+</button>
+            <div id="category-container">
+                <label for="category-select">Category:</label>
+                <select id="category-select" name="category"></select>
             </div>
-
-            <button type="button" id="submit-progress-button">Add Progress</button>
-        </form>
-
-        <div id="ukikipedia-link-container"></div>
-
-        <section id="recent-submissions">
-            <h2>Recent Submissions</h2>
-            <div id="recent-submissions-container">
+            <div class="header-right">
+                <div id="user-info"></div>
+                <button id="login-button" class="button">Log In to Sync</button>
             </div>
-        </section>
-    </main>
+        </header>
 
+        <main>
+            <form id="progress-form">
+                <label for="stage-select">Stage:</label>
+                <select id="stage-select" name="stage"></select>
+
+                <label for="star-select">Star:</label>
+                <select id="star-select" name="star"></select>
+
+                <label>Streak:</label>
+                <div id="streak-buttons-container">
+                    <button type="button" class="streak-btn" data-value="1">1</button>
+                    <button type="button" class="streak-btn" data-value="2">2</button>
+                    <button type="button" class="streak-btn" data-value="3">3</button>
+                    <button type="button" class="streak-btn" data-value="4">4</button>
+                    <input type="number" id="streak-custom-btn" class="streak-btn" value="5" min="1">
+                </div>
+                <!-- Hidden input to store the actual value for submission -->
+                <input type="hidden" id="streak-value-hidden" name="streak">
+
+                <label for="xcam-input">X-Cam Time:</label>
+                <div class="xcam-input-wrapper">
+                    <input type="text" id="xcam-input" name="xcam" placeholder="e.g., 13.36">
+                    <button type="button" id="xcam-decrement" class="xcam-stepper-btn" tabindex="-1">-</button>
+                    <button type="button" id="xcam-increment" class="xcam-stepper-btn" tabindex="-1">+</button>
+                </div>
+
+                <button type="button" id="submit-progress-button">Add Progress</button>
+            </form>
+
+            <div id="ukikipedia-link-container"></div>
+
+            <section id="recent-submissions">
+                <h2>Recent Submissions</h2>
+                <div id="recent-submissions-container">
+                </div>
+            </section>
+        </main>
+    </div>
     <script src="js/main.js" type="module"></script>
 </body>
 </html>

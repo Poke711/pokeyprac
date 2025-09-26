@@ -2,7 +2,7 @@
 
 import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
-import { showSuccessPopup, correctXCamTime } from './utils.js';
+import { showSuccessPopup, correctXCamTime, parseTimeToParts, formatHundredthsToTime } from './utils.js';
 import { triggerLogin } from './auth.js';
 // NEW: Import from dataManager
 import { saveUserSetting, loadUserSetting, getAllSubmissions, getSubmission, saveSubmission, updateSubmission } from './dataManager.js';
@@ -210,20 +210,22 @@ export function setupInputPage(user) {
     });
 
 
-    // --- X-Cam Event Listeners (No changes needed here, but included for context) ---
     xcamIncrementBtn.addEventListener('click', () => {
-        let currentValue = parseFloat(xcamInput.value) || 0;
-        const currentHundredths = Math.round(currentValue * 100);
+        const parts = parseTimeToParts(xcamInput.value);
+        const currentHundredths = parts ? parts.totalHundredths : 0;
+        
         let newHundredths = currentHundredths + 3;
-        if (newHundredths % 10 === 9) {
+        // The .x9 rule still applies
+        if ((newHundredths % 10) === 9) {
             newHundredths += 1;
         }
-        xcamInput.value = (newHundredths / 100).toFixed(2);
+
+        xcamInput.value = formatHundredthsToTime(newHundredths);
     });
 
     xcamDecrementBtn.addEventListener('click', () => {
-        let currentValue = parseFloat(xcamInput.value) || 0;
-        let currentHundredths = Math.round(currentValue * 100);
+        const parts = parseTimeToParts(xcamInput.value);
+        const currentHundredths = parts ? parts.totalHundredths : 0;
 
         if (currentHundredths <= 0) {
             xcamInput.value = "0.00";
@@ -233,20 +235,16 @@ export function setupInputPage(user) {
         let newHundredths;
         const remainder = currentHundredths % 10;
 
-        if (remainder === 0) {
-            newHundredths = currentHundredths - 4;
-        } else if (remainder === 6) {
-            newHundredths = currentHundredths - 3;
-        } else {
-            newHundredths = currentHundredths - 3;
-        }
+        if (remainder === 0) newHundredths = currentHundredths - 4;
+        else if (remainder === 6) newHundredths = currentHundredths - 3;
+        else newHundredths = currentHundredths - 3;
         
-        xcamInput.value = (newHundredths / 100).toFixed(2);
+        xcamInput.value = formatHundredthsToTime(newHundredths);
     });
 
-    // The blur event now uses the NEW, custom rounding function
+    // The blur event handler needs no changes because the function it calls
+    // has been completely updated internally to handle the new logic.
     xcamInput.addEventListener('blur', () => {
-        // The value is passed to the new function, which handles all the logic.
         xcamInput.value = correctXCamTime(xcamInput.value);
     });
 

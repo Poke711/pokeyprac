@@ -26,13 +26,62 @@ function setupGlobalUI(user) {
         if(loginButton) loginButton.textContent = "Log Out";
     } else {
         if(userInfo) userInfo.textContent = "";
-        if(loginButton) loginButton.textContent = "Log In to Sync";
+        if(loginButton) loginButton.textContent = "Log In";
     }
 }
 
+// UPDATED: The logic for showing and handling the sync button is improved.
+function setupSyncButton(user) {
+    const syncButton = document.getElementById('force-sync-button');
+    if (!syncButton) return;
+
+    const localData = localStorage.getItem('pokeyprac_submissions');
+    const syncHasCompletedThisSession = sessionStorage.getItem('syncCompleted') === 'true';
+
+    // Show the button ONLY if:
+    // 1. The user is logged in.
+    // 2. Local data exists.
+    // 3. A sync has NOT already been completed in this session.
+    if (user && localData && localData.length > 2 && !syncHasCompletedThisSession) {
+        syncButton.style.display = 'inline-block';
+    } else {
+        syncButton.style.display = 'none';
+    }
+
+    // This listener only needs to be added once.
+    syncButton.addEventListener('click', async () => {
+        if (!confirm("This will upload any new local submissions to your account. Are you sure?")) {
+            return;
+        }
+        syncButton.disabled = true;
+        syncButton.textContent = 'Syncing...';
+
+        try {
+            const result = await syncLocalDataToFirestore(user);
+            if (result.synced > 0) {
+                // IMPORTANT: Set the flag BEFORE reloading the page.
+                sessionStorage.setItem('syncCompleted', 'true');
+                alert(`${result.synced} submission(s) synced successfully! The page will now reload.`);
+                location.reload(); // Reload to show the fresh data and hide the button.
+            } else {
+                alert("No new local data was found to sync.");
+                // Even if nothing was synced, we set the flag because we've checked.
+                sessionStorage.setItem('syncCompleted', 'true');
+                syncButton.style.display = 'none'; // Hide the button immediately.
+            }
+        } catch (err) {
+            console.error("Manual sync failed:", err);
+            alert("An error occurred during the sync process.");
+        } finally {
+            syncButton.disabled = false;
+            syncButton.textContent = 'Sync Local Data';
+        }
+    });
+}
+
+
 // --- Main Application Entry Point ---
 async function main() {
-    // ADDED: Get references to the loader and content wrapper
     const loader = document.getElementById('loader');
     const appContent = document.getElementById('app-content');
 
@@ -40,40 +89,26 @@ async function main() {
         const user = await initializeAuth();
         console.log("Firebase Auth Ready. User:", user);
 
-        const localData = localStorage.getItem('pokeyprac_submissions');
-        if (user && localData && localData.length > 2 && !sessionStorage.getItem('syncCompleted')) {
-            const result = await syncLocalDataToFirestore(user);
-            sessionStorage.setItem('syncCompleted', 'true');
-            if (result.synced > 0) {
-                alert(`${result.synced} local submission(s) have been synced to your account! The page will now reload to show your updated data.`);
-                location.reload();
-                return;
-            }
-        }
-
         setupGlobalUI(user);
+        setupSyncButton(user);
 
-        // This uses the body ID for more reliable page detection
         const pageId = document.body.id;
-        if (pageId === 'home-page-body') { // Make sure your index.html body has this ID
+        if (pageId === 'home-page-body') {
             setupInputPage(user);
         } else if (pageId === 'data-page-body') {
             setupDataPage(user);
-        } else if (pageId === 'graphs-page-body') { // Make sure your graphs.html body has this ID
+        } else if (pageId === 'graphs-page-body') {
             setupGraphsPage(user);
         }
 
     } catch (error) {
         console.error("An error occurred during application startup:", error);
-        // Optionally display an error message to the user on the page
-        appContent.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ff8a80;"><h2>Oops! Something went wrong.</h2><p>Please try refreshing the page. Check the console for more details.</p></div>`;
+        appContent.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ff8a80;"><h2>Oops! Something went wrong.</h2><p>Please try refreshing the page.</p></div>`;
 
     } finally {
-        // UPDATED: This code runs whether startup succeeded or failed.
-        // It ensures the loader always goes away.
         if (loader && appContent) {
-            appContent.classList.add('loaded'); // Fade in the main content
-            loader.classList.add('hidden'); // Fade out the loader
+            appContent.classList.add('loaded');
+            loader.classList.add('hidden');
         }
     }
 }

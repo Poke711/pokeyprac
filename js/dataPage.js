@@ -1,28 +1,19 @@
 // js/dataPage.js
-// UPDATED: Import syncLocalDataToFirestore
-import { getAllSubmissions, deleteSubmission, syncLocalDataToFirestore } from './dataManager.js';
+// REMOVED: syncLocalDataToFirestore is no longer needed here
+import { getAllSubmissions, deleteSubmission } from './dataManager.js';
 import { triggerLogin } from './auth.js';
 
 export async function setupDataPage(user) {
     const tableBody = document.querySelector('#progress-table tbody');
-    // ADDED: Get reference to the new button
-    const forceSyncButton = document.getElementById('force-sync-button');
-
+    
+    // REMOVED: Reference to force-sync-button is gone
+    
     if (!tableBody) {
         console.error("Data page setup failed: Could not find '#progress-table tbody'.");
         return;
     }
 
-    // ADDED: Function to control the visibility of the sync button
-    function checkAndShowSyncButton() {
-        const localData = localStorage.getItem('pokeyprac_submissions');
-        // Show the button ONLY if the user is logged in AND local data exists
-        if (user && forceSyncButton && localData && localData.length > 2) {
-            forceSyncButton.style.display = 'inline-block';
-        } else if (forceSyncButton) {
-            forceSyncButton.style.display = 'none';
-        }
-    }
+    // REMOVED: The checkAndShowSyncButton function is gone.
 
     let allProgress = [];
 
@@ -30,8 +21,7 @@ export async function setupDataPage(user) {
         tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Loading submissions...</td></tr>`;
         allProgress = await getAllSubmissions(user);
         renderTable();
-        // ADDED: Check whether to show the sync button every time data is rendered
-        checkAndShowSyncButton();
+        // REMOVED: The call to checkAndShowSyncButton is gone.
     }
 
     function renderTable() {
@@ -67,34 +57,7 @@ export async function setupDataPage(user) {
         });
     }
     
-    // ADDED: Event listener for the new force sync button
-    if (forceSyncButton) {
-        forceSyncButton.addEventListener('click', async () => {
-            if (!confirm("This will upload all locally saved submissions to your account. Are you sure?")) {
-                return;
-            }
-            forceSyncButton.disabled = true;
-            forceSyncButton.textContent = 'Syncing...';
-
-            try {
-                const result = await syncLocalDataToFirestore(user);
-                if (result.synced > 0) {
-                    sessionStorage.setItem('syncCompleted', 'true');
-                    alert(`${result.synced} submission(s) synced successfully!`);
-                    await fetchDataAndRender(); // Refresh the table to show new data
-                } else {
-                    alert("No new local data was found to sync.");
-                }
-            } catch (err) {
-                console.error("Force sync failed:", err);
-                alert("An unexpected error occurred during the sync process.");
-            } finally {
-                forceSyncButton.disabled = false;
-                forceSyncButton.textContent = 'Sync Local Data';
-                checkAndShowSyncButton(); // Re-evaluate if the button should be shown
-            }
-        });
-    }
+    // REMOVED: The event listener for the force-sync-button is gone.
 
     tableBody.addEventListener('click', async (e) => {
         const button = e.target.closest('.action-btn');

@@ -24,12 +24,12 @@ export const categories = {
         "Bowser in the Sky": ["Stage"],
         "Castle Secret Stars": ["The Princess's Secret Slide", "MIPS, the Rabbit (1st)", "Toad's First Star", "Toad's Second Star", "Tower of the Wing Cap (8 Red Coins)"]
     },
-    "16 Star": {
+    "16 Star LBLJ": {
         "Bowser in the Dark World": ["8 Red Coins"],
         "Whomp's Fortress": ["Shoot into the Wild Blue", "Fall onto the Caged Island", "Blast Away the Wall",],
         "Shifting Sand Land": ["In the Talons of the Big Bird", "Shining Atop the Pyramid", "Inside the Ancient Pyramid"],
         "Lethal Lava Land": ["Boil the Big Bully", "8-Coin Puzzle with 15 Pieces", "Red-Hot Log Rolling", "Hot-Foot-It into the Volcano", "Elevator Tour in the Volcano"],
-        "Hazy Maze Cave": ["Swimming Beast in the Cavern","Navigating the Toxic Maze", "A-Maze-Ing Emergency Exit", "Watch for Rolling Rocks"],
+        "Hazy Maze Cave": ["Swimming Beast in the Cavern", "A-Maze-Ing Emergency Exit", "Watch for Rolling Rocks"],
         "Dire, Dire Docks": ["Board Bowser's Sub"],
         "Bowser in the Fire Sea": ["Stage"],
         "Bowser in the Sky": ["Stage"],

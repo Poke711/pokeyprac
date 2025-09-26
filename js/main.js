@@ -30,7 +30,6 @@ function setupGlobalUI(user) {
     }
 }
 
-// UPDATED: The logic for showing and handling the sync button is improved.
 function setupSyncButton(user) {
     const syncButton = document.getElementById('force-sync-button');
     if (!syncButton) return;
@@ -48,7 +47,6 @@ function setupSyncButton(user) {
         syncButton.style.display = 'none';
     }
 
-    // This listener only needs to be added once.
     syncButton.addEventListener('click', async () => {
         if (!confirm("This will upload any new local submissions to your account. Are you sure?")) {
             return;

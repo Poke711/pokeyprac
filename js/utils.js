@@ -1,6 +1,5 @@
 // js/utils.js
 
-// NEW HELPER 1: Parses a time string into its raw components.
 // Returns an object with total hundredths, or null if invalid.
 function parseTimeToParts(timeStr) {
     if (typeof timeStr !== 'string' || !timeStr.trim()) {
@@ -40,7 +39,6 @@ function parseTimeToParts(timeStr) {
     return { totalHundredths };
 }
 
-// NEW HELPER 2: Formats a total number of hundredths back into a time string.
 function formatHundredthsToTime(totalHundredths) {
     if (isNaN(totalHundredths) || totalHundredths < 0) {
         return '0.00';
@@ -63,7 +61,6 @@ function formatHundredthsToTime(totalHundredths) {
 }
 
 
-// REWRITTEN: This function now preserves the M:SS.ss format.
 export function correctXCamTime(value) {
     const parts = parseTimeToParts(value);
     if (!parts) {
@@ -85,7 +82,6 @@ export function correctXCamTime(value) {
 
 
 export function isLocalStorageAvailable() {
-    // ... (This function is unchanged)
     try {
         const storage = window.localStorage;
         const x = '__storage_test__';
@@ -98,7 +94,6 @@ export function isLocalStorageAvailable() {
 }
 
 export function showSuccessPopup(message) {
-    // ... (This function is unchanged)
     const popup = document.createElement('div');
     popup.className = 'popup';
     popup.textContent = message;
@@ -110,5 +105,4 @@ export function showSuccessPopup(message) {
     }, 3000);
 }
 
-// ADDED: Export the new helper functions for use in inputPage.js
 export { parseTimeToParts, formatHundredthsToTime };

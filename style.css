@@ -61,7 +61,6 @@ form {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    /* --- ADDED: Drop shadow for the form --- */
     box-shadow: 0 5px 20px var(--shadow-color);
 }
 
@@ -75,7 +74,6 @@ input, select {
     color: var(--primary-text-color);
     font-family: var(--font-body);
     font-size: 1rem;
-    /* --- ADDED: Subtle shadow for inputs --- */
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
@@ -100,8 +98,7 @@ button {
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 700;
-    transition: all 0.2s; /* Changed to transition all properties */
-    /* --- ADDED: Subtle shadow for buttons --- */
+    transition: all 0.2s;
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
@@ -137,7 +134,7 @@ button:active {
     text-decoration: none;
     font-weight: 700;
     transition: background-color 0.2s, color 0.2s;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.3); /* Added shadow */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 .ukikipedia-button:hover { background-color: var(--accent-color); color: white; }
 
@@ -145,7 +142,6 @@ button:active {
 table {
     width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 1rem;
     border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
-    /* --- ADDED: Drop shadow for the table --- */
     box-shadow: 0 5px 20px var(--shadow-color);
 }
 th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -177,7 +173,6 @@ td { background-color: var(--surface-color); }
 #recent-submissions {
     background: var(--surface-color); margin-top: 2rem; padding: 1rem 1.5rem;
     border-radius: 8px; border: 1px solid var(--border-color);
-    /* --- ADDED: Drop shadow for recent submissions --- */
     box-shadow: 0 5px 20px var(--shadow-color);
 }
 #recent-submissions h2 { margin-top: 0; text-align: center; font-family: var(--font-heading); }
@@ -185,13 +180,10 @@ td { background-color: var(--surface-color); }
 /* Graph Page Styles */
 .graph-page-container {
     background-color: var(--surface-color); padding: 1.5rem;
-    border-radius: 8px; border: 1px solid var(--border-color);
-    /* --- ADDED: Drop shadow for the graph container --- */
     box-shadow: 0 5px 20px var(--shadow-color);
 }
 .graph-page-container h2 { text-align: center; margin-top: 0; font-family: var(--font-heading); }
 
-/* (The rest of the file is unchanged) */
 @media (max-width: 920px) { header { flex-direction: column; text-align: center; } .header-left, .header-right { flex-direction: column; gap: 1rem; } .header-right { justify-content: center; } }
 .popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 1rem 2rem; border-radius: 5px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.5s; font-family: var(--font-body); }
 .popup.show { opacity: 1; }

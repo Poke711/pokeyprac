@@ -37,7 +37,6 @@ export async function initializeAuth() {
     }
 }
 
-// UPDATED: triggerLogin now has robust error handling for blocked popups
 export function triggerLogin() {
     signInWithPopup(auth, provider)
         .then((result) => {

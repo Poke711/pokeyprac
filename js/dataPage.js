@@ -1,19 +1,16 @@
 // js/dataPage.js
-// REMOVED: syncLocalDataToFirestore is no longer needed here
+
 import { getAllSubmissions, deleteSubmission } from './dataManager.js';
 import { triggerLogin } from './auth.js';
 
 export async function setupDataPage(user) {
     const tableBody = document.querySelector('#progress-table tbody');
     
-    // REMOVED: Reference to force-sync-button is gone
     
     if (!tableBody) {
         console.error("Data page setup failed: Could not find '#progress-table tbody'.");
         return;
     }
-
-    // REMOVED: The checkAndShowSyncButton function is gone.
 
     let allProgress = [];
 
@@ -21,7 +18,6 @@ export async function setupDataPage(user) {
         tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Loading submissions...</td></tr>`;
         allProgress = await getAllSubmissions(user);
         renderTable();
-        // REMOVED: The call to checkAndShowSyncButton is gone.
     }
 
     function renderTable() {
@@ -56,8 +52,6 @@ export async function setupDataPage(user) {
             tableBody.appendChild(row);
         });
     }
-    
-    // REMOVED: The event listener for the force-sync-button is gone.
 
     tableBody.addEventListener('click', async (e) => {
         const button = e.target.closest('.action-btn');

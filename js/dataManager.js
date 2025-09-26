@@ -5,7 +5,7 @@ import { collection, addDoc, getDocs, getDoc, query, where, orderBy, deleteDoc, 
 const LOCAL_SUBMISSIONS_KEY = 'pokeyprac_submissions';
 const LOCAL_SETTINGS_KEY = 'pokeyprac_settings';
 
-// --- Local Storage Helpers (No changes) ---
+// --- Local Storage Helpers ---
 function getLocalSubmissions() {
     return JSON.parse(localStorage.getItem(LOCAL_SUBMISSIONS_KEY)) || [];
 }
@@ -14,7 +14,7 @@ function saveLocalSubmissions(submissions) {
     localStorage.setItem(LOCAL_SUBMISSIONS_KEY, JSON.stringify(submissions));
 }
 
-// --- Unified Settings (No changes) ---
+// --- Unified Settings ---
 export async function saveUserSetting(user, key, value) {
     if (user) {
         const userRef = doc(db, "users", user.uid);
@@ -37,7 +37,7 @@ export async function loadUserSetting(user, key, defaultValue) {
     }
 }
 
-// --- Unified Data Fetching (No changes) ---
+// --- Unified Data Fetching ---
 export async function getAllSubmissions(user) {
     if (user) {
         const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("timestamp", "desc"));
@@ -62,7 +62,6 @@ export async function getSubmission(user, submissionId) {
 }
 
 // --- Unified Data Modification ---
-// UPDATED: The 'synced' flag logic has been completely removed.
 export async function saveSubmission(user, progressData) {
     const timestamp = new Date().toISOString();
     if (user) {
@@ -77,7 +76,6 @@ export async function saveSubmission(user, progressData) {
             ...progressData,
             id: `local_${Date.now()}`,
             timestamp: timestamp
-            // No 'synced' flag is added anymore.
         });
         saveLocalSubmissions(submissions);
     }
@@ -104,7 +102,7 @@ export async function deleteSubmission(user, submissionId) {
 }
 
 // --- Sync Logic ---
-// UPDATED: This is the new "smart sync" function.
+
 export async function syncLocalDataToFirestore(user) {
     const localSubmissions = getLocalSubmissions();
     if (!user || localSubmissions.length === 0) {

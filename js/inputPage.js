@@ -4,7 +4,6 @@ import { stages as masterStages } from './stages.js';
 import { categories } from './categoryData.js';
 import { showSuccessPopup, correctXCamTime, parseTimeToParts, formatHundredthsToTime } from './utils.js';
 import { triggerLogin } from './auth.js';
-// NEW: Import from dataManager
 import { saveUserSetting, loadUserSetting, getAllSubmissions, getSubmission, saveSubmission, updateSubmission } from './dataManager.js';
 
 // --- DOM Element References ---
@@ -119,19 +118,15 @@ export function setupInputPage(user) {
         }
         hiddenStreakInput.value = value;
     }
-
-    // UPDATED: Uses dataManager
     async function loadCustomStreakValue() {
         const value = await loadUserSetting(user, 'customStreakValue', 5);
         customStreakBtn.value = value;
     }
 
-    // UPDATED: Uses dataManager
     async function saveCustomStreakValue(value) {
         await saveUserSetting(user, 'customStreakValue', value);
     }
 
-    // UPDATED: Uses dataManager and works whether logged in or out
     async function displayRecentSubmissions() {
         const container = document.getElementById('recent-submissions-container');
         if (!container) return;
@@ -167,7 +162,6 @@ export function setupInputPage(user) {
             }
         }
     
-    // UPDATED: Uses dataManager and prevents editing when logged out
     async function loadDataForEditing() {
         if (!editId) return;
         if (!user) {
